@@ -284,34 +284,41 @@
       line-height: 1.6;
     }
     .upcoming-item {
-      display: flex;
-      align-items: baseline;
-      gap: 8px;
-      margin-bottom: 5px;
-      padding-left: 4px;
+      display: block;
+      margin-bottom: 10px;
+      padding: 8px;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 4px;
     }
     .upcoming-item:last-child {
       margin-bottom: 0;
     }
     .event-dot {
+      display: inline-block;
       width: 6px;
       height: 6px;
       background: #000;
       border-radius: 50%;
-      flex-shrink: 0;
-      margin-top: 5px;
+      margin-right: 8px;
+      vertical-align: middle;
     }
     .upcoming-date {
+      display: inline-block;
       font-weight: 700;
       font-size: 10px;
-      min-width: 50px;
-      flex-shrink: 0;
+      color: #666;
+      vertical-align: middle;
     }
     .upcoming-title {
-      flex: 1;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      margin-top: 4px;
+      padding-left: 14px;
+      line-height: 1.4;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
     }
     .todo-list {
       overflow: auto;
@@ -544,6 +551,8 @@
         var item = document.createElement("div");
         item.className = "upcoming-item";
 
+        var dateRow = document.createElement("div");
+        
         var dot = document.createElement("span");
         dot.className = "event-dot";
 
@@ -551,12 +560,13 @@
         dateSpan.className = "upcoming-date";
         dateSpan.innerHTML = months[event.date.getMonth()] + " " + event.date.getDate();
 
-        var titleSpan = document.createElement("span");
+        var titleSpan = document.createElement("div");
         titleSpan.className = "upcoming-title";
         titleSpan.innerHTML = event.title;
 
-        item.appendChild(dot);
-        item.appendChild(dateSpan);
+        dateRow.appendChild(dot);
+        dateRow.appendChild(dateSpan);
+        item.appendChild(dateRow);
         item.appendChild(titleSpan);
         list.appendChild(item);
       });
@@ -780,10 +790,42 @@
       }
     }
 
+    // Enhanced e-ink refresh - forces display update on specific regions
+    function forceEinkRefresh() {
+      // Method 1: Force reflow on the entire tasks section
+      var tasksCard = document.getElementById('tasksCard');
+      if (tasksCard) {
+        tasksCard.style.display = 'none';
+        tasksCard.offsetHeight; // Force reflow
+        tasksCard.style.display = '';
+      }
+
+      // Method 2: Force reflow on calendar
+      var calendarCard = document.getElementById('calendarCard');
+      if (calendarCard) {
+        calendarCard.style.display = 'none';
+        calendarCard.offsetHeight; // Force reflow
+        calendarCard.style.display = '';
+      }
+
+      // Method 3: Trigger body reflow multiple times
+      for (var i = 0; i < 3; i++) {
+        setTimeout(function() {
+          document.body.offsetHeight;
+          if (document.body.style) {
+            document.body.style.transform = 'translateZ(0)';
+            setTimeout(function() {
+              document.body.style.transform = '';
+            }, 10);
+          }
+        }, i * 100);
+      }
+    }
+
     // Fetch events from Firebase REST API
     function fetchEvents() {
       var xhr = new XMLHttpRequest();
-      xhr.open('GET', FIREBASE_URL + '/events.json', true);
+      xhr.open('GET', FIREBASE_URL + '/events.json?timestamp=' + new Date().getTime(), true);
       xhr.timeout = 10000;
       
       xhr.onreadystatechange = function() {
@@ -794,6 +836,7 @@
             
             // Check if data changed
             if (dataString !== previousEventsData) {
+              console.log('Events data changed, updating...');
               previousEventsData = dataString;
               calendarEvents = [];
               
@@ -808,7 +851,7 @@
               }
               
               renderCalendar();
-              einkNudge(); // Force e-ink refresh
+              forceEinkRefresh(); // Force display update
             }
           } catch (e) {
             console.error('Events error:', e);
@@ -822,7 +865,7 @@
     // Fetch todos from Firebase REST API
     function fetchTodos() {
       var xhr = new XMLHttpRequest();
-      xhr.open('GET', FIREBASE_URL + '/todos.json', true);
+      xhr.open('GET', FIREBASE_URL + '/todos.json?timestamp=' + new Date().getTime(), true);
       xhr.timeout = 10000;
       
       xhr.onreadystatechange = function() {
@@ -833,6 +876,7 @@
             
             // Check if data changed
             if (dataString !== previousTodosData) {
+              console.log('Todos data changed, updating...');
               previousTodosData = dataString;
               todos = [];
               
@@ -847,7 +891,7 @@
               }
               
               renderTodos();
-              einkNudge(); // Force e-ink refresh
+              forceEinkRefresh(); // Force display update
             }
           } catch (e) {
             console.error('Todos error:', e);
