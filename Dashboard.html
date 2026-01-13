@@ -25,12 +25,6 @@
       -ms-user-select:none;
       user-select:none;
     }
-    input, textarea{
-      -webkit-user-select:text;
-      -moz-user-select:text;
-      -ms-user-select:text;
-      user-select:text;
-    }
 
     .wrap{
       box-sizing:border-box;
@@ -150,7 +144,6 @@
     .forecast-precip{ font-size:9px; color:#666; display:block; }
 
     .content{ width:100%; overflow:hidden; margin-top:-1px; }
-
     .cols{
       display:table;
       width:100%;
@@ -166,6 +159,7 @@
       vertical-align:top;
     }
 
+    /* Keep overall cards as-is */
     .card{
       border:2px solid #000;
       padding:var(--pad);
@@ -173,9 +167,7 @@
       overflow:hidden;
       height:100%;
       box-sizing:border-box;
-      display:flex;
-      flex-direction:column;
-      min-height:0; /* critical for flex overflow */
+      position:relative;
     }
     .col:first-child .card{
       border-top-left-radius:var(--r);
@@ -187,7 +179,6 @@
       border-bottom-right-radius:var(--r);
       border-left:1px solid #000;
     }
-
     .card h2{
       font-size:11px;
       font-weight:700;
@@ -197,35 +188,16 @@
       padding-bottom:8px;
       border-bottom:2px solid #000;
       text-align:center;
-      flex:0 0 auto;
     }
 
-    .card-body{
-      flex:1 1 auto;
-      overflow:hidden;
-      display:flex;
-      flex-direction:column;
-      min-height:0; /* critical for flex overflow */
-    }
-
-    .tasks-inner{
-      padding:0 8px;
-      display:flex;
-      flex-direction:column;
-      height:100%;
-      overflow:hidden;
-      min-height:0; /* critical for flex overflow */
-    }
-
+    /* Calendar */
     .cal-head{
       text-align:center;
       font-weight:700;
       margin-bottom:10px;
       font-size:14px;
-      flex:0 0 auto;
     }
     #calendarGrid{ overflow:hidden; }
-
     .cal-cell{
       display:inline-block;
       width:13.2%;
@@ -262,20 +234,31 @@
       line-height:1;
     }
 
-    /* Upcoming: fixed footprint, list scrolls */
-    .upcoming-section{
-      margin-bottom:10px;
+    /* ----- NEW: fixed regions in Tasks card (no flex) ----- */
+    /* Reserve header space by positioning inner area below h2 */
+    #tasksCardInner{
+      position:absolute;
+      left:10px;
+      right:10px;
+      top:44px;     /* below the header + border */
+      bottom:10px;  /* padding bottom */
+      overflow:hidden;
+    }
+
+    #upcomingPanel{
+      position:absolute;
+      left:0; right:0;
+      top:0;
+      height:190px;
       padding:8px 10px;
       background:#f9f9f9;
       border:1px solid #ddd;
       border-radius:4px;
-
-      flex:0 0 190px;     /* fixed region height */
-      max-height:190px;
-      overflow:hidden;    /* keep it from growing */
       box-sizing:border-box;
+      overflow:hidden;
     }
-    .upcoming-header{
+
+    #upcomingHeader{
       font-size:10px;
       font-weight:700;
       text-transform:uppercase;
@@ -283,10 +266,15 @@
       margin-bottom:6px;
       color:var(--accent);
     }
+
     #upcomingList{
+      position:absolute;
+      left:10px;
+      right:10px;
+      top:28px;   /* under header */
+      bottom:8px; /* panel padding */
       overflow-y:auto;
       -webkit-overflow-scrolling:touch;
-      max-height:155px; /* 190 minus header/padding */
     }
 
     .upcoming-item{
@@ -316,8 +304,6 @@
       color:#666;
       vertical-align:middle;
     }
-
-    /* Single-line (no growth) for event title */
     .upcoming-title{
       display:block;
       font-size:11px;
@@ -325,20 +311,20 @@
       margin-top:3px;
       padding-left:14px;
       line-height:1.3;
-
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
     }
 
-    /* Tasks: fill remaining space, list scrolls */
-    .todo-list{
-      flex:1 1 auto;
-      min-height:0; /* critical for flex overflow */
+    #todoList{
+      position:absolute;
+      left:0; right:0;
+      top:200px;   /* just below upcoming panel (190 + 10 gap) */
+      bottom:0;
       overflow-y:auto;
       -webkit-overflow-scrolling:touch;
-      box-sizing:border-box;
       padding:0 4px;
+      box-sizing:border-box;
     }
 
     .todo-item{
@@ -350,7 +336,7 @@
       display:block;
       font-size:12px;
       line-height:1.3;
-      overflow:hidden; /* prevent internal growth */
+      overflow:hidden;
     }
     .todo-item.done{ opacity:0.5; text-decoration:line-through; }
     .todo-item:active{ background:#e0e0e0; }
@@ -369,7 +355,6 @@
       vertical-align:middle;
       margin-left:6px;
       font-size:11px;
-
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
@@ -416,24 +401,22 @@
         <div class="col">
           <div class="card" id="calendarCard">
             <h2>Calendar</h2>
-            <div class="card-body">
-              <div class="cal-head" id="calendarMonth">—</div>
-              <div id="calendarGrid"></div>
-            </div>
+            <div class="cal-head" id="calendarMonth">—</div>
+            <div id="calendarGrid"></div>
           </div>
         </div>
 
         <div class="col">
           <div class="card" id="tasksCard">
             <h2>Tasks & Events</h2>
-            <div class="card-body">
-              <div class="tasks-inner">
-                <div class="upcoming-section">
-                  <div class="upcoming-header">Upcoming</div>
-                  <div id="upcomingList"></div>
-                </div>
-                <div class="todo-list" id="todoList"></div>
+
+            <div id="tasksCardInner">
+              <div id="upcomingPanel">
+                <div id="upcomingHeader">Upcoming</div>
+                <div id="upcomingList"></div>
               </div>
+
+              <div id="todoList"></div>
             </div>
           </div>
         </div>
@@ -598,7 +581,7 @@
       }).slice(0, 3);
 
       if (!upcoming.length){
-        list.innerHTML = '<div style="opacity:0.5;font-size:10px;padding-left:4px;">No upcoming events</div>';
+        list.innerHTML = '<div style="opacity:0.5;font-size:10px;">No upcoming events</div>';
         return;
       }
 
@@ -631,6 +614,50 @@
         item.appendChild(titleSpan);
         list.appendChild(item);
       });
+    }
+
+    function renderTodos(){
+      var list = document.getElementById("todoList");
+      list.innerHTML = "";
+
+      if (!todos.length){
+        var empty = document.createElement("div");
+        empty.className = "todo-item";
+        empty.style.textAlign = "center";
+        empty.style.opacity = "0.5";
+        empty.innerHTML = "No tasks yet";
+        list.appendChild(empty);
+        return;
+      }
+
+      for (var i=0; i<todos.length; i++){
+        (function(todo){
+          var row = document.createElement("div");
+          row.className = "todo-item" + (todo.done ? " done" : "");
+          row.style.cursor = "pointer";
+
+          var cb = document.createElement("input");
+          cb.type = "checkbox";
+          cb.checked = !!todo.done;
+          cb.onclick = function(e){
+            e.stopPropagation();
+            toggleTask(todo.id);
+          };
+
+          var text = document.createElement("span");
+          text.className = "todo-text";
+          text.innerHTML = todo.text;
+
+          row.onclick = function(e){
+            if (e.target === cb) return;
+            if (confirm("Delete task: " + todo.text + "?")) deleteTask(todo.id);
+          };
+
+          row.appendChild(cb);
+          row.appendChild(text);
+          list.appendChild(row);
+        })(todos[i]);
+      }
     }
 
     function describeWeather(code){
@@ -809,50 +836,6 @@
 
       xhr.ontimeout = function(){ setWeatherStatus("Last updated: —"); };
       try{ xhr.send(); }catch(e){ setWeatherStatus("Last updated: —"); }
-    }
-
-    function renderTodos(){
-      var list = document.getElementById("todoList");
-      list.innerHTML = "";
-
-      if (!todos.length){
-        var empty = document.createElement("div");
-        empty.className = "todo-item";
-        empty.style.textAlign = "center";
-        empty.style.opacity = "0.5";
-        empty.innerHTML = "No tasks yet";
-        list.appendChild(empty);
-        return;
-      }
-
-      for (var i=0; i<todos.length; i++){
-        (function(todo){
-          var row = document.createElement("div");
-          row.className = "todo-item" + (todo.done ? " done" : "");
-          row.style.cursor = "pointer";
-
-          var cb = document.createElement("input");
-          cb.type = "checkbox";
-          cb.checked = !!todo.done;
-          cb.onclick = function(e){
-            e.stopPropagation();
-            toggleTask(todo.id);
-          };
-
-          var text = document.createElement("span");
-          text.className = "todo-text";
-          text.innerHTML = todo.text;
-
-          row.onclick = function(e){
-            if (e.target === cb) return;
-            if (confirm("Delete task: " + todo.text + "?")) deleteTask(todo.id);
-          };
-
-          row.appendChild(cb);
-          row.appendChild(text);
-          list.appendChild(row);
-        })(todos[i]);
-      }
     }
 
     function forceEinkRefresh(){
