@@ -426,6 +426,8 @@
 
     var calendarEvents = [];
     var todos = [];
+    var previousEventsData = null;
+    var previousTodosData = null;
 
     function pad2(n){ return n < 10 ? ("0" + n) : ("" + n); }
     
@@ -788,19 +790,26 @@
         if (xhr.readyState === 4 && xhr.status === 200) {
           try {
             var data = JSON.parse(xhr.responseText);
-            calendarEvents = [];
+            var dataString = JSON.stringify(data);
             
-            if (data) {
-              for (var key in data) {
-                calendarEvents.push({
-                  id: key,
-                  date: new Date(data[key].date),
-                  title: data[key].title
-                });
+            // Check if data changed
+            if (dataString !== previousEventsData) {
+              previousEventsData = dataString;
+              calendarEvents = [];
+              
+              if (data) {
+                for (var key in data) {
+                  calendarEvents.push({
+                    id: key,
+                    date: new Date(data[key].date),
+                    title: data[key].title
+                  });
+                }
               }
+              
+              renderCalendar();
+              einkNudge(); // Force e-ink refresh
             }
-            
-            renderCalendar();
           } catch (e) {
             console.error('Events error:', e);
           }
@@ -820,19 +829,26 @@
         if (xhr.readyState === 4 && xhr.status === 200) {
           try {
             var data = JSON.parse(xhr.responseText);
-            todos = [];
+            var dataString = JSON.stringify(data);
             
-            if (data) {
-              for (var key in data) {
-                todos.push({
-                  id: key,
-                  text: data[key].text,
-                  done: data[key].done || false
-                });
+            // Check if data changed
+            if (dataString !== previousTodosData) {
+              previousTodosData = dataString;
+              todos = [];
+              
+              if (data) {
+                for (var key in data) {
+                  todos.push({
+                    id: key,
+                    text: data[key].text,
+                    done: data[key].done || false
+                  });
+                }
               }
+              
+              renderTodos();
+              einkNudge(); // Force e-ink refresh
             }
-            
-            renderTodos();
           } catch (e) {
             console.error('Todos error:', e);
           }
@@ -854,8 +870,12 @@
       setInterval(updateClocks, CLOCK_EVERY_MS);
       setInterval(updateWeather, WEATHER_EVERY_MS);
       setInterval(update7DayForecast, FORECAST_EVERY_MS);
-      setInterval(fetchEvents, 5 * 60 * 1000); // Refresh events every 5 minutes
-      setInterval(fetchTodos, 5 * 60 * 1000);  // Refresh todos every 5 minutes
+      
+      // Check for changes every 30 seconds
+      setInterval(function() {
+        fetchEvents();
+        fetchTodos();
+      }, 30 * 1000);
     }
 
     startTimers();
