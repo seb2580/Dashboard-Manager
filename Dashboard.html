@@ -8,367 +8,371 @@
 
   <style>
     html, body { touch-action: manipulation; }
-    html, body {
-      margin: 0; padding: 0;
-      width: 100%; height: 100%;
-      overflow: hidden;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-      background: #fff; color: #000;
+    html, body{
+      margin:0; padding:0;
+      width:100%; height:100%;
+      overflow:hidden;
+      font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      background:#fff; color:#000;
     }
     :root { --gray:#ccc; --accent:#222; --pad:10px; --r:6px; }
-    body {
+
+    body{
       -webkit-tap-highlight-color: rgba(0,0,0,0);
-      -webkit-touch-callout: none;
-      -webkit-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
-      user-select: none;
+      -webkit-touch-callout:none;
+      -webkit-user-select:none;
+      -moz-user-select:none;
+      -ms-user-select:none;
+      user-select:none;
     }
-    input, textarea {
-      -webkit-user-select: text;
-      -moz-user-select: text;
-      -ms-user-select: text;
-      user-select: text;
+    input, textarea{
+      -webkit-user-select:text;
+      -moz-user-select:text;
+      -ms-user-select:text;
+      user-select:text;
     }
-    .wrap {
-      box-sizing: border-box;
-      width: 1072px;
-      max-width: 100%;
-      height: 100%;
-      margin: 0 auto;
-      padding: var(--pad);
-      position: relative;
+
+    .wrap{
+      box-sizing:border-box;
+      width:1072px;
+      max-width:100%;
+      height:100%;
+      margin:0 auto;
+      padding:var(--pad);
+      position:relative;
     }
-    .toprow {
-      width: 100%;
-      border: 2px solid #000;
-      border-radius: var(--r);
-      padding: var(--pad);
-      margin-bottom: var(--pad);
-      box-sizing: border-box;
+
+    .toprow{
+      width:100%;
+      border:2px solid #000;
+      border-radius:var(--r);
+      padding:var(--pad);
+      margin-bottom:var(--pad);
+      box-sizing:border-box;
     }
-    .toprow table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-    .toprow td { vertical-align: top; }
-    .top-left { width: 50%; padding-right: 8px; box-sizing: border-box; }
-    .top-right { width: 50%; border-left: 2px solid #000; padding-left: 12px; box-sizing: border-box; }
-    .title { 
-      font-size: 11px; 
-      font-weight: 700; 
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin: 0 0 4px 0; 
+    .toprow table{ width:100%; border-collapse:collapse; table-layout:fixed; }
+    .toprow td{ vertical-align:top; }
+    .top-left{ width:50%; padding-right:8px; box-sizing:border-box; }
+    .top-right{ width:50%; border-left:2px solid #000; padding-left:12px; box-sizing:border-box; }
+
+    .title{
+      font-size:11px; font-weight:700;
+      text-transform:uppercase;
+      letter-spacing:1px;
+      margin:0 0 4px 0;
     }
-    .date { 
-      font-size: 14px; 
-      color: var(--accent); 
-      margin-bottom: 4px;
+    .date{ font-size:14px; color:var(--accent); margin-bottom:4px; }
+    .big-clock{
+      font-size:56px; font-weight:800;
+      letter-spacing:-1px;
+      margin-top:4px;
+      line-height:1.0;
     }
-    .big-clock { 
-      font-size: 56px; 
-      font-weight: 800; 
-      letter-spacing: -1px; 
-      margin-top: 4px; 
-      line-height: 1.0; 
-    }
-    .ampm { font-size: 16px; font-weight: 700; letter-spacing: 0; }
+    .ampm{ font-size:16px; font-weight:700; letter-spacing:0; }
+
     .weather-head{
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: var(--accent);
-      margin-bottom: 8px;
-      white-space: nowrap;
-      text-align: left;
-      width: 100%;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      font-size:11px;
+      font-weight:700;
+      text-transform:uppercase;
+      letter-spacing:1px;
+      color:var(--accent);
+      margin-bottom:8px;
+      white-space:nowrap;
+      text-align:left;
+      width:100%;
+      overflow:hidden;
+      text-overflow:ellipsis;
     }
-    .weather-head .loc{ font-weight: 600; text-transform: none; }
-    .weather-row { width: 100%; overflow: hidden; }
-    .wbox { width: 49%; float: left; text-align: center; }
-    .wbox.right { float: right; }
-    .wlabel { 
-      font-size: 10px; 
-      color: var(--accent); 
-      margin-bottom: 4px; 
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+    .weather-head .loc{ font-weight:600; text-transform:none; }
+
+    .weather-row{ width:100%; overflow:hidden; }
+    .wbox{ width:49%; float:left; text-align:center; }
+    .wbox.right{ float:right; }
+    .wlabel{
+      font-size:10px; color:var(--accent);
+      margin-bottom:4px;
+      text-transform:uppercase;
+      letter-spacing:0.5px;
     }
-    .wval { font-size: 32px; font-weight: 800; line-height: 1.05; }
-    .wdetail { font-size: 11px; color: var(--accent); margin-top: 4px; font-style: italic; }
-    .status {
-      clear: both;
-      margin-top: 8px;
-      font-size: 10px;
-      color: #555;
-      text-align: right;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      display: block;
-      font-style: italic;
+    .wval{ font-size:32px; font-weight:800; line-height:1.05; }
+    .wdetail{ font-size:11px; color:var(--accent); margin-top:4px; font-style:italic; }
+    .status{
+      clear:both;
+      margin-top:8px;
+      font-size:10px;
+      color:#555;
+      text-align:right;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      display:block;
+      font-style:italic;
     }
-    .forecast-bar {
-      width: 100%;
-      border: 2px solid #000;
-      border-radius: var(--r);
-      padding: 8px;
-      margin-bottom: var(--pad);
-      margin-top: -2px;
-      box-sizing: border-box;
-      background: #fff;
-      overflow: hidden;
-      display: block;
+
+    .forecast-bar{
+      width:100%;
+      border:2px solid #000;
+      border-radius:var(--r);
+      padding:8px;
+      margin-bottom:var(--pad);
+      margin-top:-2px;
+      box-sizing:border-box;
+      background:#fff;
+      overflow:hidden;
+      display:block;
     }
-    .forecast-days {
-      display: table;
-      width: 100%;
-      table-layout: fixed;
-      border-collapse: collapse;
+    .forecast-days{
+      display:table;
+      width:100%;
+      table-layout:fixed;
+      border-collapse:collapse;
     }
-    .forecast-day {
-      display: table-cell;
-      width: 14.28%;
-      text-align: center;
-      padding: 6px 4px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      background: #f9f9f9;
-      box-sizing: border-box;
-      vertical-align: top;
+    .forecast-day{
+      display:table-cell;
+      width:14.28%;
+      text-align:center;
+      padding:6px 4px;
+      border:1px solid #ddd;
+      border-radius:4px;
+      background:#f9f9f9;
+      box-sizing:border-box;
+      vertical-align:top;
     }
-    .forecast-day-name {
-      font-size: 10px;
-      font-weight: 700;
-      text-transform: uppercase;
-      margin-bottom: 4px;
-      display: block;
+    .forecast-day-name{
+      font-size:10px;
+      font-weight:700;
+      text-transform:uppercase;
+      margin-bottom:4px;
+      display:block;
     }
-    .forecast-icon {
-      font-size: 20px;
-      margin: 4px 0;
-      display: block;
+    .forecast-icon{ font-size:20px; margin:4px 0; display:block; }
+    .forecast-temp{ font-size:11px; font-weight:700; margin:4px 0; display:block; }
+    .forecast-precip{ font-size:9px; color:#666; display:block; }
+
+    .content{ width:100%; overflow:hidden; margin-top:-1px; }
+
+    .cols{
+      display:table;
+      width:100%;
+      height:100%;
+      table-layout:fixed;
+      border-spacing:0;
+      border-collapse:separate;
     }
-    .forecast-temp {
-      font-size: 11px;
-      font-weight: 700;
-      margin: 4px 0;
-      display: block;
+    .col{
+      display:table-cell;
+      width:50%;
+      box-sizing:border-box;
+      vertical-align:top;
     }
-    .forecast-precip {
-      font-size: 9px;
-      color: #666;
-      display: block;
+
+    .card{
+      border:2px solid #000;
+      padding:var(--pad);
+      margin:0;
+      overflow:hidden;
+      height:100%;
+      box-sizing:border-box;
+      display:flex;
+      flex-direction:column;
+      min-height:0; /* critical for flex overflow */
     }
-    .content {
-      width: 100%;
-      overflow: hidden;
-      margin-top: -1px;
+    .col:first-child .card{
+      border-top-left-radius:var(--r);
+      border-bottom-left-radius:var(--r);
+      border-right:1px solid #000;
     }
-    .cols { 
-      display: table;
-      width: 100%; 
-      height: 100%;
-      table-layout: fixed;
-      border-spacing: 0;
-      border-collapse: separate;
+    .col:last-child .card{
+      border-top-right-radius:var(--r);
+      border-bottom-right-radius:var(--r);
+      border-left:1px solid #000;
     }
-    .col { 
-      display: table-cell;
-      width: 50%;
-      box-sizing: border-box; 
-      vertical-align: top;
+
+    .card h2{
+      font-size:11px;
+      font-weight:700;
+      text-transform:uppercase;
+      letter-spacing:1px;
+      margin:0 0 8px 0;
+      padding-bottom:8px;
+      border-bottom:2px solid #000;
+      text-align:center;
+      flex:0 0 auto;
     }
-    .card {
-      border: 2px solid #000;
-      padding: var(--pad);
-      margin: 0;
-      overflow: hidden;
-      height: 100%;
-      box-sizing: border-box;
-      display: flex;
-      flex-direction: column;
+
+    .card-body{
+      flex:1 1 auto;
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      min-height:0; /* critical for flex overflow */
     }
-    .col:first-child .card {
-      border-top-left-radius: var(--r);
-      border-bottom-left-radius: var(--r);
-      border-right: 1px solid #000;
+
+    .tasks-inner{
+      padding:0 8px;
+      display:flex;
+      flex-direction:column;
+      height:100%;
+      overflow:hidden;
+      min-height:0; /* critical for flex overflow */
     }
-    .col:last-child .card {
-      border-top-right-radius: var(--r);
-      border-bottom-right-radius: var(--r);
-      border-left: 1px solid #000;
+
+    .cal-head{
+      text-align:center;
+      font-weight:700;
+      margin-bottom:10px;
+      font-size:14px;
+      flex:0 0 auto;
     }
-    .card h2 {
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin: 0 0 8px 0;
-      padding-bottom: 8px;
-      border-bottom: 2px solid #000;
-      text-align: center;
+    #calendarGrid{ overflow:hidden; }
+
+    .cal-cell{
+      display:inline-block;
+      width:13.2%;
+      border:1px solid var(--gray);
+      text-align:center;
+      padding:6px 0;
+      font-size:12px;
+      margin:1px 0;
+      box-sizing:border-box;
+      position:relative;
     }
-    .card-body { 
-      flex: 1;
-      overflow: hidden; 
-      display: flex;
-      flex-direction: column;
+    .cal-dow{
+      font-weight:700;
+      border:none;
+      padding:2px 0;
+      font-size:10px;
+      text-transform:uppercase;
     }
-    .tasks-inner {
-      padding: 0 8px;
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-      overflow: hidden;
-    }
-    .cal-head { 
-      text-align: center; 
-      font-weight: 700; 
-      margin-bottom: 10px; 
-      font-size: 14px;
-    }
-    #calendarGrid { overflow: hidden; }
-    .cal-cell {
-      display: inline-block;
-      width: 13.2%;
-      border: 1px solid var(--gray);
-      text-align: center;
-      padding: 6px 0;
-      font-size: 12px;
-      margin: 1px 0;
-      box-sizing: border-box;
-      position: relative;
-    }
-    .cal-dow { 
-      font-weight: 700; 
-      border: none; 
-      padding: 2px 0; 
-      font-size: 10px;
-      text-transform: uppercase;
-    }
-    .cal-cell.other { opacity: 0.3; }
+    .cal-cell.other{ opacity:0.3; }
     .cal-cell.today{
-      background: #f0f0f0;
-      color: #000;
-      font-weight: 800;
-      border: 2px solid #000;
+      background:#f0f0f0;
+      color:#000;
+      font-weight:800;
+      border:2px solid #000;
     }
-    .cal-cell.has-event::before {
-      content: "●";
-      position: absolute;
-      top: 2px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 6px;
-      color: #000;
-      line-height: 1;
+    .cal-cell.has-event::before{
+      content:"●";
+      position:absolute;
+      top:2px;
+      left:50%;
+      transform:translateX(-50%);
+      font-size:6px;
+      color:#000;
+      line-height:1;
     }
-    .upcoming-section {
-      margin-bottom: 12px;
-      padding: 8px 10px;
-      background: #f9f9f9;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      max-height: 200px;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-      flex-shrink: 0;
+
+    /* Upcoming: fixed footprint, list scrolls */
+    .upcoming-section{
+      margin-bottom:10px;
+      padding:8px 10px;
+      background:#f9f9f9;
+      border:1px solid #ddd;
+      border-radius:4px;
+
+      flex:0 0 190px;     /* fixed region height */
+      max-height:190px;
+      overflow:hidden;    /* keep it from growing */
+      box-sizing:border-box;
     }
-    .upcoming-header {
-      font-size: 10px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 8px;
-      color: var(--accent);
+    .upcoming-header{
+      font-size:10px;
+      font-weight:700;
+      text-transform:uppercase;
+      letter-spacing:0.5px;
+      margin-bottom:6px;
+      color:var(--accent);
     }
-    .upcoming-compact {
-      font-size: 11px;
-      line-height: 1.6;
+    #upcomingList{
+      overflow-y:auto;
+      -webkit-overflow-scrolling:touch;
+      max-height:155px; /* 190 minus header/padding */
     }
-    .upcoming-item {
-      display: block;
-      margin-bottom: 8px;
-      padding: 6px;
-      background: #fff;
-      border: 1px solid #ddd;
-      border-radius: 4px;
+
+    .upcoming-item{
+      display:block;
+      margin-bottom:8px;
+      padding:6px;
+      background:#fff;
+      border:1px solid #ddd;
+      border-radius:4px;
     }
-    .upcoming-item:last-child {
-      margin-bottom: 0;
+    .upcoming-item:last-child{ margin-bottom:0; }
+    .upcoming-item:active{ background:#e0e0e0; border-color:#999; }
+
+    .event-dot{
+      display:inline-block;
+      width:6px;
+      height:6px;
+      background:#000;
+      border-radius:50%;
+      margin-right:8px;
+      vertical-align:middle;
     }
-    .upcoming-item:active {
-      background: #e0e0e0;
-      border-color: #999;
+    .upcoming-date{
+      display:inline-block;
+      font-weight:700;
+      font-size:10px;
+      color:#666;
+      vertical-align:middle;
     }
-    .event-dot {
-      display: inline-block;
-      width: 6px;
-      height: 6px;
-      background: #000;
-      border-radius: 50%;
-      margin-right: 8px;
-      vertical-align: middle;
+
+    /* Single-line (no growth) for event title */
+    .upcoming-title{
+      display:block;
+      font-size:11px;
+      font-weight:600;
+      margin-top:3px;
+      padding-left:14px;
+      line-height:1.3;
+
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
     }
-    .upcoming-date {
-      display: inline-block;
-      font-weight: 700;
-      font-size: 10px;
-      color: #666;
-      vertical-align: middle;
+
+    /* Tasks: fill remaining space, list scrolls */
+    .todo-list{
+      flex:1 1 auto;
+      min-height:0; /* critical for flex overflow */
+      overflow-y:auto;
+      -webkit-overflow-scrolling:touch;
+      box-sizing:border-box;
+      padding:0 4px;
     }
-    .upcoming-title {
-      display: block;
-      font-size: 11px;
-      font-weight: 600;
-      margin-top: 3px;
-      padding-left: 14px;
-      line-height: 1.3;
-      word-wrap: break-word;
-      overflow-wrap: break-word;
+
+    .todo-item{
+      background:#f5f5f5;
+      border:1px solid #000;
+      border-radius:4px;
+      padding:8px 10px;
+      margin-bottom:8px;
+      display:block;
+      font-size:12px;
+      line-height:1.3;
+      overflow:hidden; /* prevent internal growth */
     }
-    .todo-list {
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-      flex: 1;
-      box-sizing: border-box;
-      padding: 0 4px;
-      min-height: 0;
+    .todo-item.done{ opacity:0.5; text-decoration:line-through; }
+    .todo-item:active{ background:#e0e0e0; }
+
+    .todo-item input[type="checkbox"]{
+      width:18px;
+      height:18px;
+      vertical-align:middle;
+      margin-right:2px;
+      cursor:pointer;
+      pointer-events:auto;
     }
-    .todo-item {
-      background: #f5f5f5;
-      border: 1px solid #000;
-      border-radius: 4px;
-      padding: 8px 10px;
-      margin-bottom: 8px;
-      display: block;
-      font-size: 12px;
-      line-height: 1.3;
-      overflow: hidden;
-    }
-    .todo-item.done { opacity: 0.5; text-decoration: line-through; }
-    .todo-item:active {
-      background: #e0e0e0;
-    }
-    .todo-item input[type="checkbox"] { 
-      width: 18px; 
-      height: 18px; 
-      vertical-align: middle;
-      margin-right: 2px;
-      cursor: pointer;
-      pointer-events: auto;
-    }
-    .todo-text {
-      display: inline-block;
-      width: 80%;
-      vertical-align: middle;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      margin-left: 6px;
-      font-size: 11px;
+    .todo-text{
+      display:inline-block;
+      width:80%;
+      vertical-align:middle;
+      margin-left:6px;
+      font-size:11px;
+
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
     }
   </style>
 </head>
@@ -418,6 +422,7 @@
             </div>
           </div>
         </div>
+
         <div class="col">
           <div class="card" id="tasksCard">
             <h2>Tasks & Events</h2>
@@ -425,13 +430,14 @@
               <div class="tasks-inner">
                 <div class="upcoming-section">
                   <div class="upcoming-header">Upcoming</div>
-                  <div class="upcoming-compact" id="upcomingList"></div>
+                  <div id="upcomingList"></div>
                 </div>
                 <div class="todo-list" id="todoList"></div>
               </div>
             </div>
           </div>
         </div>
+
       </div>
     </div>
   </div>
@@ -452,8 +458,8 @@
     var previousEventsData = null;
     var previousTodosData = null;
 
-    function pad2(n){ return n < 10 ? ("0" + n) : ("" + n); }
-    
+    function pad2(n){ return n < 10 ? ("0"+n) : (""+n); }
+
     function formatTime12(d){
       var h24 = d.getHours();
       var mm = pad2(d.getMinutes());
@@ -462,7 +468,7 @@
     }
 
     function einkNudge(){
-      try { document.body.offsetHeight; } catch(e) {}
+      try{ document.body.offsetHeight; }catch(e){}
       setTimeout(function(){ try{ document.body.offsetHeight; }catch(e){} }, 50);
     }
 
@@ -485,11 +491,9 @@
     }
 
     function hasEvent(year, month, day){
-      for (var i = 0; i < calendarEvents.length; i++){
+      for (var i=0; i<calendarEvents.length; i++){
         var e = calendarEvents[i].date;
-        if (e.getFullYear() === year && e.getMonth() === month && e.getDate() === day){
-          return true;
-        }
+        if (e.getFullYear()===year && e.getMonth()===month && e.getDate()===day) return true;
       }
       return false;
     }
@@ -503,27 +507,27 @@
       document.getElementById("calendarMonth").innerHTML = monthNames[month] + " " + year;
 
       var firstDay = new Date(year, month, 1).getDay();
-      var daysInMonth = new Date(year, month + 1, 0).getDate();
+      var daysInMonth = new Date(year, month+1, 0).getDate();
       var daysInPrevMonth = new Date(year, month, 0).getDate();
 
       var grid = document.getElementById("calendarGrid");
       grid.innerHTML = "";
 
-      for (var d = 0; d < 7; d++){
+      for (var d=0; d<7; d++){
         var h = document.createElement("div");
         h.className = "cal-cell cal-dow";
         h.innerHTML = dayNames[d];
         grid.appendChild(h);
       }
 
-      for (var i = firstDay - 1; i >= 0; i--){
+      for (var i=firstDay-1; i>=0; i--){
         var c = document.createElement("div");
         c.className = "cal-cell other";
         c.innerHTML = "" + (daysInPrevMonth - i);
         grid.appendChild(c);
       }
 
-      for (var j = 1; j <= daysInMonth; j++){
+      for (var j=1; j<=daysInMonth; j++){
         var c2 = document.createElement("div");
         c2.className = "cal-cell";
         if (j === now.getDate()) c2.className += " today";
@@ -545,60 +549,40 @@
       einkNudge();
     }
 
-    function deleteEvent(id) {
+    function deleteEvent(id){
       var xhr = new XMLHttpRequest();
       xhr.open('DELETE', FIREBASE_URL + '/events/' + id + '.json', true);
       xhr.timeout = 10000;
-      
-      xhr.onreadystatechange = function() {
-        if (xhr.readyState === 4 && xhr.status === 200) {
-          console.log('Event deleted');
-          fetchEvents(); // Refresh the list
-        }
+      xhr.onreadystatechange = function(){
+        if (xhr.readyState === 4 && xhr.status === 200) fetchEvents();
       };
-      
       xhr.send();
     }
 
-    function deleteTask(id) {
+    function deleteTask(id){
       var xhr = new XMLHttpRequest();
       xhr.open('DELETE', FIREBASE_URL + '/todos/' + id + '.json', true);
       xhr.timeout = 10000;
-      
-      xhr.onreadystatechange = function() {
-        if (xhr.readyState === 4 && xhr.status === 200) {
-          console.log('Task deleted');
-          fetchTodos(); // Refresh the list
-        }
+      xhr.onreadystatechange = function(){
+        if (xhr.readyState === 4 && xhr.status === 200) fetchTodos();
       };
-      
       xhr.send();
     }
 
-    function toggleTask(id) {
-      // Find the task
+    function toggleTask(id){
       var task = null;
-      for (var i = 0; i < todos.length; i++) {
-        if (todos[i].id === id) {
-          task = todos[i];
-          break;
-        }
+      for (var i=0; i<todos.length; i++){
+        if (todos[i].id === id){ task = todos[i]; break; }
       }
-      
       if (!task) return;
-      
+
       var xhr = new XMLHttpRequest();
       xhr.open('PATCH', FIREBASE_URL + '/todos/' + id + '.json', true);
       xhr.timeout = 10000;
       xhr.setRequestHeader('Content-Type', 'application/json');
-      
-      xhr.onreadystatechange = function() {
-        if (xhr.readyState === 4 && xhr.status === 200) {
-          console.log('Task toggled');
-          fetchTodos(); // Refresh the list
-        }
+      xhr.onreadystatechange = function(){
+        if (xhr.readyState === 4 && xhr.status === 200) fetchTodos();
       };
-      
       xhr.send(JSON.stringify({ done: !task.done }));
     }
 
@@ -609,7 +593,7 @@
 
       var upcoming = calendarEvents.filter(function(e){
         return e.date >= now;
-      }).sort(function(a, b){
+      }).sort(function(a,b){
         return a.date - b.date;
       }).slice(0, 3);
 
@@ -624,16 +608,12 @@
         var item = document.createElement("div");
         item.className = "upcoming-item";
         item.style.cursor = "pointer";
-        
-        // Add tap to delete
-        item.onclick = function() {
-          if (confirm("Delete event: " + event.title + "?")) {
-            deleteEvent(event.id);
-          }
+        item.onclick = function(){
+          if (confirm("Delete event: " + event.title + "?")) deleteEvent(event.id);
         };
 
         var dateRow = document.createElement("div");
-        
+
         var dot = document.createElement("span");
         dot.className = "event-dot";
 
@@ -703,7 +683,7 @@
       var best = 0;
       var bestDiff = Infinity;
       var nowMs = now.getTime();
-      for (var i = 0; i < times.length; i++){
+      for (var i=0; i<times.length; i++){
         var t = new Date(times[i]);
         var diff = Math.abs(t.getTime() - nowMs);
         if (diff < bestDiff){
@@ -726,20 +706,16 @@
       var xhr = new XMLHttpRequest();
       xhr.open("GET", url, true);
       xhr.timeout = 12000;
-
       xhr.onreadystatechange = function(){
         if (xhr.readyState !== 4) return;
         if (xhr.status >= 200 && xhr.status < 300){
           try{
             var data = JSON.parse(xhr.responseText);
             render7DayForecast(data.daily);
-          }catch(e){
-            console.error("Forecast parse error", e);
-          }
+          }catch(e){}
         }
       };
-
-      try { xhr.send(); } catch(e){}
+      try{ xhr.send(); }catch(e){}
     }
 
     function render7DayForecast(daily){
@@ -750,21 +726,20 @@
 
       var dayNames = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 
-      for (var i = 0; i < Math.min(7, daily.time.length); i++){
+      for (var i=0; i<Math.min(7, daily.time.length); i++){
         var date = new Date(daily.time[i]);
-        var dayName = i === 0 ? "Today" : dayNames[date.getDay()];
-        
+        var dayName = (i === 0) ? "Today" : dayNames[date.getDay()];
+
         var maxTemp = daily.temperature_2m_max ? Math.round(daily.temperature_2m_max[i]) : "--";
         var minTemp = daily.temperature_2m_min ? Math.round(daily.temperature_2m_min[i]) : "--";
         var weatherCode = daily.weather_code ? daily.weather_code[i] : 0;
         var precipProb = daily.precipitation_probability_max ? Math.round(daily.precipitation_probability_max[i]) : 0;
-        
+
         var icon = iconForWeather(weatherCode);
 
         var dayDiv = document.createElement("div");
         dayDiv.className = "forecast-day";
-
-        dayDiv.innerHTML = 
+        dayDiv.innerHTML =
           '<div class="forecast-day-name">' + dayName + '</div>' +
           '<div class="forecast-icon">' + icon + '</div>' +
           '<div class="forecast-temp">' + maxTemp + '° / ' + minTemp + '°</div>' +
@@ -803,7 +778,7 @@
             if (!w){ setWeatherStatus("Last updated: —"); return; }
 
             var ic = iconForWeather(w.weathercode);
-            document.getElementById("temp").innerHTML = 
+            document.getElementById("temp").innerHTML =
               (ic ? (ic + " ") : "") + Math.round(w.temperature) + "°";
 
             document.getElementById("wind").innerHTML = Math.round(w.windspeed) + " km/h";
@@ -833,7 +808,7 @@
       };
 
       xhr.ontimeout = function(){ setWeatherStatus("Last updated: —"); };
-      try { xhr.send(); } catch(e){ setWeatherStatus("Last updated: —"); }
+      try{ xhr.send(); }catch(e){ setWeatherStatus("Last updated: —"); }
     }
 
     function renderTodos(){
@@ -855,14 +830,11 @@
           var row = document.createElement("div");
           row.className = "todo-item" + (todo.done ? " done" : "");
           row.style.cursor = "pointer";
-          row.style.position = "relative";
 
           var cb = document.createElement("input");
           cb.type = "checkbox";
           cb.checked = !!todo.done;
-          
-          // Tap checkbox to toggle
-          cb.onclick = function(e) {
+          cb.onclick = function(e){
             e.stopPropagation();
             toggleTask(todo.id);
           };
@@ -871,12 +843,9 @@
           text.className = "todo-text";
           text.innerHTML = todo.text;
 
-          // Tap task text to delete
-          row.onclick = function(e) {
-            if (e.target === cb) return; // Don't delete when clicking checkbox
-            if (confirm("Delete task: " + todo.text + "?")) {
-              deleteTask(todo.id);
-            }
+          row.onclick = function(e){
+            if (e.target === cb) return;
+            if (confirm("Delete task: " + todo.text + "?")) deleteTask(todo.id);
           };
 
           row.appendChild(cb);
@@ -886,58 +855,47 @@
       }
     }
 
-    // Enhanced e-ink refresh - forces display update on specific regions
-    function forceEinkRefresh() {
-      // Method 1: Force reflow on the entire tasks section
+    function forceEinkRefresh(){
       var tasksCard = document.getElementById('tasksCard');
-      if (tasksCard) {
+      if (tasksCard){
         tasksCard.style.display = 'none';
-        tasksCard.offsetHeight; // Force reflow
+        tasksCard.offsetHeight;
         tasksCard.style.display = '';
       }
-
-      // Method 2: Force reflow on calendar
       var calendarCard = document.getElementById('calendarCard');
-      if (calendarCard) {
+      if (calendarCard){
         calendarCard.style.display = 'none';
-        calendarCard.offsetHeight; // Force reflow
+        calendarCard.offsetHeight;
         calendarCard.style.display = '';
       }
-
-      // Method 3: Trigger body reflow multiple times
-      for (var i = 0; i < 3; i++) {
-        setTimeout(function() {
-          document.body.offsetHeight;
-          if (document.body.style) {
-            document.body.style.transform = 'translateZ(0)';
-            setTimeout(function() {
-              document.body.style.transform = '';
-            }, 10);
-          }
-        }, i * 100);
+      for (var i=0; i<3; i++){
+        setTimeout(function(){
+          try{
+            document.body.offsetHeight;
+            if (document.body.style){
+              document.body.style.transform = 'translateZ(0)';
+              setTimeout(function(){ document.body.style.transform=''; }, 10);
+            }
+          }catch(e){}
+        }, i*100);
       }
     }
 
-    // Fetch events from Firebase REST API
-    function fetchEvents() {
+    function fetchEvents(){
       var xhr = new XMLHttpRequest();
-      xhr.open('GET', FIREBASE_URL + '/events.json?timestamp=' + new Date().getTime(), true);
+      xhr.open('GET', FIREBASE_URL + '/events.json?timestamp=' + (new Date().getTime()), true);
       xhr.timeout = 10000;
-      
-      xhr.onreadystatechange = function() {
-        if (xhr.readyState === 4 && xhr.status === 200) {
-          try {
+
+      xhr.onreadystatechange = function(){
+        if (xhr.readyState === 4 && xhr.status === 200){
+          try{
             var data = JSON.parse(xhr.responseText);
             var dataString = JSON.stringify(data);
-            
-            // Check if data changed
-            if (dataString !== previousEventsData) {
-              console.log('Events data changed, updating...');
+            if (dataString !== previousEventsData){
               previousEventsData = dataString;
               calendarEvents = [];
-              
-              if (data) {
-                for (var key in data) {
+              if (data){
+                for (var key in data){
                   calendarEvents.push({
                     id: key,
                     date: new Date(data[key].date),
@@ -945,39 +903,30 @@
                   });
                 }
               }
-              
               renderCalendar();
-              forceEinkRefresh(); // Force display update
+              forceEinkRefresh();
             }
-          } catch (e) {
-            console.error('Events error:', e);
-          }
+          }catch(e){}
         }
       };
-      
       xhr.send();
     }
-    
-    // Fetch todos from Firebase REST API
-    function fetchTodos() {
+
+    function fetchTodos(){
       var xhr = new XMLHttpRequest();
-      xhr.open('GET', FIREBASE_URL + '/todos.json?timestamp=' + new Date().getTime(), true);
+      xhr.open('GET', FIREBASE_URL + '/todos.json?timestamp=' + (new Date().getTime()), true);
       xhr.timeout = 10000;
-      
-      xhr.onreadystatechange = function() {
-        if (xhr.readyState === 4 && xhr.status === 200) {
-          try {
+
+      xhr.onreadystatechange = function(){
+        if (xhr.readyState === 4 && xhr.status === 200){
+          try{
             var data = JSON.parse(xhr.responseText);
             var dataString = JSON.stringify(data);
-            
-            // Check if data changed
-            if (dataString !== previousTodosData) {
-              console.log('Todos data changed, updating...');
+            if (dataString !== previousTodosData){
               previousTodosData = dataString;
               todos = [];
-              
-              if (data) {
-                for (var key in data) {
+              if (data){
+                for (var key in data){
                   todos.push({
                     id: key,
                     text: data[key].text,
@@ -985,20 +934,15 @@
                   });
                 }
               }
-              
               renderTodos();
-              forceEinkRefresh(); // Force display update
+              forceEinkRefresh();
             }
-          } catch (e) {
-            console.error('Todos error:', e);
-          }
+          }catch(e){}
         }
       };
-      
       xhr.send();
     }
 
-    // Start everything
     function startTimers(){
       updateClocks();
       renderCalendar();
@@ -1010,9 +954,8 @@
       setInterval(updateClocks, CLOCK_EVERY_MS);
       setInterval(updateWeather, WEATHER_EVERY_MS);
       setInterval(update7DayForecast, FORECAST_EVERY_MS);
-      
-      // Check for changes every 30 seconds
-      setInterval(function() {
+
+      setInterval(function(){
         fetchEvents();
         fetchTodos();
       }, 30 * 1000);
