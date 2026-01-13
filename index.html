@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -116,6 +115,16 @@
 
     .btn-secondary:active {
       background: #e0e0e0;
+    }
+
+    .btn-refresh {
+      background: #2196F3;
+      color: #fff;
+      margin-top: 8px;
+    }
+
+    .btn-refresh:active {
+      background: #1976D2;
     }
 
     .item-list {
@@ -257,6 +266,26 @@
       grid-template-columns: 2fr 1fr;
       gap: 12px;
     }
+
+    .refresh-section {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    .refresh-section h3 {
+      font-size: 16px;
+      margin-bottom: 8px;
+    }
+
+    .refresh-section p {
+      font-size: 13px;
+      opacity: 0.9;
+      margin-bottom: 16px;
+    }
   </style>
 </head>
 
@@ -267,6 +296,15 @@
   </div>
 
   <div id="statusMessage" style="display: none;" class="status"></div>
+
+  <!-- Refresh Section -->
+  <div class="refresh-section">
+    <h3>🔄 Kobo Dashboard Sync</h3>
+    <p>Click below to trigger refresh on your Kobo dashboard</p>
+    <button class="btn btn-refresh" onclick="triggerKoboRefresh()">
+      Refresh Kobo Dashboard
+    </button>
+  </div>
 
   <!-- Navigation Tabs -->
   <div class="section">
@@ -344,6 +382,7 @@
 
     const eventsRef = ref(database, 'events');
     const todosRef = ref(database, 'todos');
+    const refreshTriggerRef = ref(database, 'refreshTrigger');
 
     let currentTab = 'events';
     let events = [];
@@ -363,6 +402,18 @@
         document.querySelector('.tab-btn:last-child').classList.add('active');
         document.getElementById('tasksTab').classList.add('active');
       }
+    };
+
+    // Trigger Kobo refresh
+    window.triggerKoboRefresh = function() {
+      set(refreshTriggerRef, {
+        timestamp: Date.now(),
+        trigger: Math.random()
+      }).then(() => {
+        showStatus('Refresh signal sent to Kobo!');
+      }).catch((error) => {
+        showStatus('Error: ' + error.message, true);
+      });
     };
 
     // Status messages
@@ -475,13 +526,15 @@
       push(eventsRef, {
         title: title,
         date: dateTime.toISOString()
+      }).then(() => {
+        document.getElementById('eventTitle').value = '';
+        document.getElementById('eventDate').value = '';
+        document.getElementById('eventTime').value = '';
+        showStatus('Event added successfully!');
+        
+        // Auto-trigger refresh
+        triggerKoboRefresh();
       });
-
-      document.getElementById('eventTitle').value = '';
-      document.getElementById('eventDate').value = '';
-      document.getElementById('eventTime').value = '';
-      
-      showStatus('Event added successfully!');
     });
 
     // Add task
@@ -498,25 +551,32 @@
       push(todosRef, {
         text: text,
         done: false
+      }).then(() => {
+        document.getElementById('taskText').value = '';
+        showStatus('Task added successfully!');
+        
+        // Auto-trigger refresh
+        triggerKoboRefresh();
       });
-
-      document.getElementById('taskText').value = '';
-      showStatus('Task added successfully!');
     });
 
     // Delete event
     window.deleteEvent = function(id) {
       if (confirm('Delete this event?')) {
-        remove(ref(database, 'events/' + id));
-        showStatus('Event deleted');
+        remove(ref(database, 'events/' + id)).then(() => {
+          showStatus('Event deleted');
+          triggerKoboRefresh();
+        });
       }
     };
 
     // Delete task
     window.deleteTask = function(id) {
       if (confirm('Delete this task?')) {
-        remove(ref(database, 'todos/' + id));
-        showStatus('Task deleted');
+        remove(ref(database, 'todos/' + id)).then(() => {
+          showStatus('Task deleted');
+          triggerKoboRefresh();
+        });
       }
     };
 
@@ -526,6 +586,8 @@
       if (task) {
         update(ref(database, 'todos/' + id), {
           done: !task.done
+        }).then(() => {
+          triggerKoboRefresh();
         });
       }
     };
