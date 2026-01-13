@@ -294,6 +294,10 @@
     .upcoming-item:last-child {
       margin-bottom: 0;
     }
+    .upcoming-item:active {
+      background: #e0e0e0;
+      border-color: #999;
+    }
     .event-dot {
       display: inline-block;
       width: 6px;
@@ -339,11 +343,16 @@
       overflow: hidden;
     }
     .todo-item.done { opacity: 0.5; text-decoration: line-through; }
+    .todo-item:active {
+      background: #e0e0e0;
+    }
     .todo-item input[type="checkbox"] { 
       width: 18px; 
       height: 18px; 
       vertical-align: middle;
       margin-right: 2px;
+      cursor: pointer;
+      pointer-events: auto;
     }
     .todo-text {
       display: inline-block;
@@ -529,6 +538,63 @@
       einkNudge();
     }
 
+    function deleteEvent(id) {
+      var xhr = new XMLHttpRequest();
+      xhr.open('DELETE', FIREBASE_URL + '/events/' + id + '.json', true);
+      xhr.timeout = 10000;
+      
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+          console.log('Event deleted');
+          fetchEvents(); // Refresh the list
+        }
+      };
+      
+      xhr.send();
+    }
+
+    function deleteTask(id) {
+      var xhr = new XMLHttpRequest();
+      xhr.open('DELETE', FIREBASE_URL + '/todos/' + id + '.json', true);
+      xhr.timeout = 10000;
+      
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+          console.log('Task deleted');
+          fetchTodos(); // Refresh the list
+        }
+      };
+      
+      xhr.send();
+    }
+
+    function toggleTask(id) {
+      // Find the task
+      var task = null;
+      for (var i = 0; i < todos.length; i++) {
+        if (todos[i].id === id) {
+          task = todos[i];
+          break;
+        }
+      }
+      
+      if (!task) return;
+      
+      var xhr = new XMLHttpRequest();
+      xhr.open('PATCH', FIREBASE_URL + '/todos/' + id + '.json', true);
+      xhr.timeout = 10000;
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+          console.log('Task toggled');
+          fetchTodos(); // Refresh the list
+        }
+      };
+      
+      xhr.send(JSON.stringify({ done: !task.done }));
+    }
+
     function renderUpcoming(){
       var now = new Date();
       var list = document.getElementById("upcomingList");
@@ -550,6 +616,14 @@
       upcoming.forEach(function(event){
         var item = document.createElement("div");
         item.className = "upcoming-item";
+        item.style.cursor = "pointer";
+        
+        // Add tap to delete
+        item.onclick = function() {
+          if (confirm("Delete event: " + event.title + "?")) {
+            deleteEvent(event.id);
+          }
+        };
 
         var dateRow = document.createElement("div");
         
@@ -773,15 +847,30 @@
         (function(todo){
           var row = document.createElement("div");
           row.className = "todo-item" + (todo.done ? " done" : "");
+          row.style.cursor = "pointer";
+          row.style.position = "relative";
 
           var cb = document.createElement("input");
           cb.type = "checkbox";
           cb.checked = !!todo.done;
-          cb.disabled = true;
+          
+          // Tap checkbox to toggle
+          cb.onclick = function(e) {
+            e.stopPropagation();
+            toggleTask(todo.id);
+          };
 
           var text = document.createElement("span");
           text.className = "todo-text";
           text.innerHTML = todo.text;
+
+          // Tap task text to delete
+          row.onclick = function(e) {
+            if (e.target === cb) return; // Don't delete when clicking checkbox
+            if (confirm("Delete task: " + todo.text + "?")) {
+              deleteTask(todo.id);
+            }
+          };
 
           row.appendChild(cb);
           row.appendChild(text);
