@@ -25,6 +25,12 @@
       -ms-user-select:none;
       user-select:none;
     }
+    input, textarea{
+      -webkit-user-select:text;
+      -moz-user-select:text;
+      -ms-user-select:text;
+      user-select:text;
+    }
 
     .wrap{
       box-sizing:border-box;
@@ -166,8 +172,9 @@
       overflow:hidden;
       height:100%;
       box-sizing:border-box;
-      position:relative; /* IMPORTANT containing block */
-      background:#fff;
+      display:flex;
+      flex-direction:column;
+      min-height:0;
     }
     .col:first-child .card{
       border-top-left-radius:var(--r);
@@ -179,6 +186,7 @@
       border-bottom-right-radius:var(--r);
       border-left:1px solid #000;
     }
+
     .card h2{
       font-size:11px;
       font-weight:700;
@@ -188,6 +196,24 @@
       padding-bottom:8px;
       border-bottom:2px solid #000;
       text-align:center;
+      flex:0 0 auto;
+    }
+
+    .card-body{
+      flex:1 1 auto;
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      min-height:0;
+    }
+
+    .tasks-inner{
+      padding:0 8px;
+      display:flex;
+      flex-direction:column;
+      height:100%;
+      overflow:hidden;
+      min-height:0;
     }
 
     /* Calendar */
@@ -196,6 +222,7 @@
       font-weight:700;
       margin-bottom:10px;
       font-size:14px;
+      flex:0 0 auto;
     }
     #calendarGrid{ overflow:hidden; }
     .cal-cell{
@@ -234,48 +261,26 @@
       line-height:1;
     }
 
-    /* Tasks card absolute layout */
-    #tasksCardInner{
-      position:absolute;
-      left:10px;
-      right:10px;
-      top:46px;     /* a bit more room under header line */
-      bottom:10px;
-      overflow:hidden;
-      background:#fff;
-    }
-
-    #upcomingPanel{
-      position:absolute;
-      left:0; right:0;
-      top:0;
-      height:190px;
+    /* Upcoming */
+    .upcoming-section{
+      margin-bottom:12px;
       padding:8px 10px;
       background:#f9f9f9;
       border:1px solid #ddd;
       border-radius:4px;
-      box-sizing:border-box;
-      overflow:hidden;
-      z-index:1;
+      flex:0 0 auto;
     }
-
-    #upcomingHeader{
+    .upcoming-header{
       font-size:10px;
       font-weight:700;
       text-transform:uppercase;
       letter-spacing:0.5px;
-      margin-bottom:6px;
+      margin-bottom:8px;
       color:var(--accent);
     }
-
-    #upcomingList{
-      position:absolute;
-      left:10px;
-      right:10px;
-      top:28px;
-      bottom:8px;
-      overflow-y:auto;
-      -webkit-overflow-scrolling:touch;
+    .upcoming-compact{
+      font-size:11px;
+      line-height:1.6;
     }
 
     .upcoming-item{
@@ -305,6 +310,7 @@
       color:#666;
       vertical-align:middle;
     }
+    /* single-line */
     .upcoming-title{
       display:block;
       font-size:11px;
@@ -317,30 +323,15 @@
       text-overflow:ellipsis;
     }
 
-    /* Separator gap so it never overlaps */
-    #tasksDivider{
-      position:absolute;
-      left:0; right:0;
-      top:198px;  /* 190 panel + 8 gap */
-      height:8px;
-      background:#fff;
-      z-index:2;
-    }
-
-    /* Todo list: guaranteed visible area */
-    #todoList{
-      position:absolute;
-      left:0; right:0;
-      top:206px;   /* upcomingPanel (190) + gap(16) */
-      bottom:0;
-      overflow-y:auto;
+    /* Todo list */
+    .todo-list{
+      flex:1 1 auto;
+      min-height:0;
+      overflow:auto;
       -webkit-overflow-scrolling:touch;
-      padding:0 4px;
       box-sizing:border-box;
-      background:#fff;
-      z-index:0;
+      padding:0 4px;
     }
-
     .todo-item{
       background:#f5f5f5;
       border:1px solid #000;
@@ -363,15 +354,16 @@
       cursor:pointer;
       pointer-events:auto;
     }
+    /* single-line */
     .todo-text{
       display:inline-block;
       width:80%;
       vertical-align:middle;
-      margin-left:6px;
-      font-size:11px;
-      white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
+      white-space:nowrap;
+      margin-left:6px;
+      font-size:11px;
     }
   </style>
 </head>
@@ -415,23 +407,24 @@
         <div class="col">
           <div class="card" id="calendarCard">
             <h2>Calendar</h2>
-            <div class="cal-head" id="calendarMonth">—</div>
-            <div id="calendarGrid"></div>
+            <div class="card-body">
+              <div class="cal-head" id="calendarMonth">—</div>
+              <div id="calendarGrid"></div>
+            </div>
           </div>
         </div>
 
         <div class="col">
           <div class="card" id="tasksCard">
             <h2>Tasks & Events</h2>
-
-            <div id="tasksCardInner">
-              <div id="upcomingPanel">
-                <div id="upcomingHeader">Upcoming</div>
-                <div id="upcomingList"></div>
+            <div class="card-body">
+              <div class="tasks-inner">
+                <div class="upcoming-section">
+                  <div class="upcoming-header">Upcoming</div>
+                  <div class="upcoming-compact" id="upcomingList"></div>
+                </div>
+                <div class="todo-list" id="todoList"></div>
               </div>
-
-              <div id="tasksDivider"></div>
-              <div id="todoList"></div>
             </div>
           </div>
         </div>
@@ -456,7 +449,7 @@
     var previousEventsData = null;
     var previousTodosData = null;
 
-    function pad2(n){ return n < 10 ? ("0"+n) : (""+n); }
+    function pad2(n){ return n < 10 ? ("0" + n) : ("" + n); }
 
     function formatTime12(d){
       var h24 = d.getHours();
@@ -489,9 +482,9 @@
     }
 
     function hasEvent(year, month, day){
-      for (var i=0; i<calendarEvents.length; i++){
+      for (var i = 0; i < calendarEvents.length; i++){
         var e = calendarEvents[i].date;
-        if (e.getFullYear()===year && e.getMonth()===month && e.getDate()===day) return true;
+        if (e.getFullYear() === year && e.getMonth() === month && e.getDate() === day) return true;
       }
       return false;
     }
@@ -505,27 +498,27 @@
       document.getElementById("calendarMonth").innerHTML = monthNames[month] + " " + year;
 
       var firstDay = new Date(year, month, 1).getDay();
-      var daysInMonth = new Date(year, month+1, 0).getDate();
+      var daysInMonth = new Date(year, month + 1, 0).getDate();
       var daysInPrevMonth = new Date(year, month, 0).getDate();
 
       var grid = document.getElementById("calendarGrid");
       grid.innerHTML = "";
 
-      for (var d=0; d<7; d++){
+      for (var d = 0; d < 7; d++){
         var h = document.createElement("div");
         h.className = "cal-cell cal-dow";
         h.innerHTML = dayNames[d];
         grid.appendChild(h);
       }
 
-      for (var i=firstDay-1; i>=0; i--){
+      for (var i = firstDay - 1; i >= 0; i--){
         var c = document.createElement("div");
         c.className = "cal-cell other";
         c.innerHTML = "" + (daysInPrevMonth - i);
         grid.appendChild(c);
       }
 
-      for (var j=1; j<=daysInMonth; j++){
+      for (var j = 1; j <= daysInMonth; j++){
         var c2 = document.createElement("div");
         c2.className = "cal-cell";
         if (j === now.getDate()) c2.className += " today";
@@ -569,7 +562,7 @@
 
     function toggleTask(id){
       var task = null;
-      for (var i=0; i<todos.length; i++){
+      for (var i = 0; i < todos.length; i++){
         if (todos[i].id === id){ task = todos[i]; break; }
       }
       if (!task) return;
@@ -596,7 +589,7 @@
       }).slice(0, 3);
 
       if (!upcoming.length){
-        list.innerHTML = '<div style="opacity:0.5;font-size:10px;">No upcoming events</div>';
+        list.innerHTML = '<div style="opacity:0.5;font-size:10px;padding-left:4px;">No upcoming events</div>';
         return;
       }
 
@@ -722,16 +715,11 @@
 
     function findNearestHourlyIndex(times, now){
       if (!times || !times.length) return -1;
-      var best = 0;
-      var bestDiff = Infinity;
-      var nowMs = now.getTime();
-      for (var i=0; i<times.length; i++){
+      var best = 0, bestDiff = Infinity, nowMs = now.getTime();
+      for (var i = 0; i < times.length; i++){
         var t = new Date(times[i]);
         var diff = Math.abs(t.getTime() - nowMs);
-        if (diff < bestDiff){
-          bestDiff = diff;
-          best = i;
-        }
+        if (diff < bestDiff){ bestDiff = diff; best = i; }
       }
       return best;
     }
@@ -762,21 +750,17 @@
 
     function render7DayForecast(daily){
       if (!daily || !daily.time) return;
-
       var container = document.getElementById("forecastDays");
       container.innerHTML = "";
-
       var dayNames = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 
-      for (var i=0; i<Math.min(7, daily.time.length); i++){
+      for (var i = 0; i < Math.min(7, daily.time.length); i++){
         var date = new Date(daily.time[i]);
         var dayName = (i === 0) ? "Today" : dayNames[date.getDay()];
-
         var maxTemp = daily.temperature_2m_max ? Math.round(daily.temperature_2m_max[i]) : "--";
         var minTemp = daily.temperature_2m_min ? Math.round(daily.temperature_2m_min[i]) : "--";
         var weatherCode = daily.weather_code ? daily.weather_code[i] : 0;
         var precipProb = daily.precipitation_probability_max ? Math.round(daily.precipitation_probability_max[i]) : 0;
-
         var icon = iconForWeather(weatherCode);
 
         var dayDiv = document.createElement("div");
@@ -789,7 +773,6 @@
 
         container.appendChild(dayDiv);
       }
-
       einkNudge();
     }
 
@@ -809,10 +792,8 @@
       var xhr = new XMLHttpRequest();
       xhr.open("GET", url, true);
       xhr.timeout = 12000;
-
       xhr.onreadystatechange = function(){
         if (xhr.readyState !== 4) return;
-
         if (xhr.status >= 200 && xhr.status < 300){
           try{
             var data = JSON.parse(xhr.responseText);
@@ -822,7 +803,6 @@
             var ic = iconForWeather(w.weathercode);
             document.getElementById("temp").innerHTML =
               (ic ? (ic + " ") : "") + Math.round(w.temperature) + "°";
-
             document.getElementById("wind").innerHTML = Math.round(w.windspeed) + " km/h";
 
             var desc = describeWeather(w.weathercode);
@@ -835,7 +815,6 @@
                 pop = data.hourly.precipitation_probability[idx];
               }
             }
-
             document.getElementById("rainChance").innerHTML =
               (pop === null || pop === undefined) ? "--%" : (Math.round(pop) + "%");
 
@@ -848,7 +827,6 @@
           setWeatherStatus("Last updated: —");
         }
       };
-
       xhr.ontimeout = function(){ setWeatherStatus("Last updated: —"); };
       try{ xhr.send(); }catch(e){ setWeatherStatus("Last updated: —"); }
     }
@@ -866,16 +844,16 @@
         calendarCard.offsetHeight;
         calendarCard.style.display = '';
       }
-      for (var i=0; i<3; i++){
+      for (var i = 0; i < 3; i++){
         setTimeout(function(){
           try{
             document.body.offsetHeight;
             if (document.body.style){
               document.body.style.transform = 'translateZ(0)';
-              setTimeout(function(){ document.body.style.transform=''; }, 10);
+              setTimeout(function(){ document.body.style.transform = ''; }, 10);
             }
           }catch(e){}
-        }, i*100);
+        }, i * 100);
       }
     }
 
@@ -883,7 +861,6 @@
       var xhr = new XMLHttpRequest();
       xhr.open('GET', FIREBASE_URL + '/events.json?timestamp=' + (new Date().getTime()), true);
       xhr.timeout = 10000;
-
       xhr.onreadystatechange = function(){
         if (xhr.readyState === 4 && xhr.status === 200){
           try{
@@ -895,9 +872,9 @@
               if (data){
                 for (var key in data){
                   calendarEvents.push({
-                    id: key,
-                    date: new Date(data[key].date),
-                    title: data[key].title
+                    id:key,
+                    date:new Date(data[key].date),
+                    title:data[key].title
                   });
                 }
               }
@@ -914,7 +891,6 @@
       var xhr = new XMLHttpRequest();
       xhr.open('GET', FIREBASE_URL + '/todos.json?timestamp=' + (new Date().getTime()), true);
       xhr.timeout = 10000;
-
       xhr.onreadystatechange = function(){
         if (xhr.readyState === 4 && xhr.status === 200){
           try{
@@ -926,9 +902,9 @@
               if (data){
                 for (var key in data){
                   todos.push({
-                    id: key,
-                    text: data[key].text,
-                    done: data[key].done || false
+                    id:key,
+                    text:data[key].text,
+                    done:data[key].done || false
                   });
                 }
               }
