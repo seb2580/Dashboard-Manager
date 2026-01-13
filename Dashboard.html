@@ -159,7 +159,6 @@
       vertical-align:top;
     }
 
-    /* Keep overall cards as-is */
     .card{
       border:2px solid #000;
       padding:var(--pad);
@@ -167,7 +166,8 @@
       overflow:hidden;
       height:100%;
       box-sizing:border-box;
-      position:relative;
+      position:relative; /* IMPORTANT containing block */
+      background:#fff;
     }
     .col:first-child .card{
       border-top-left-radius:var(--r);
@@ -234,15 +234,15 @@
       line-height:1;
     }
 
-    /* ----- NEW: fixed regions in Tasks card (no flex) ----- */
-    /* Reserve header space by positioning inner area below h2 */
+    /* Tasks card absolute layout */
     #tasksCardInner{
       position:absolute;
       left:10px;
       right:10px;
-      top:44px;     /* below the header + border */
-      bottom:10px;  /* padding bottom */
+      top:46px;     /* a bit more room under header line */
+      bottom:10px;
       overflow:hidden;
+      background:#fff;
     }
 
     #upcomingPanel{
@@ -256,6 +256,7 @@
       border-radius:4px;
       box-sizing:border-box;
       overflow:hidden;
+      z-index:1;
     }
 
     #upcomingHeader{
@@ -271,8 +272,8 @@
       position:absolute;
       left:10px;
       right:10px;
-      top:28px;   /* under header */
-      bottom:8px; /* panel padding */
+      top:28px;
+      bottom:8px;
       overflow-y:auto;
       -webkit-overflow-scrolling:touch;
     }
@@ -316,15 +317,28 @@
       text-overflow:ellipsis;
     }
 
+    /* Separator gap so it never overlaps */
+    #tasksDivider{
+      position:absolute;
+      left:0; right:0;
+      top:198px;  /* 190 panel + 8 gap */
+      height:8px;
+      background:#fff;
+      z-index:2;
+    }
+
+    /* Todo list: guaranteed visible area */
     #todoList{
       position:absolute;
       left:0; right:0;
-      top:200px;   /* just below upcoming panel (190 + 10 gap) */
+      top:206px;   /* upcomingPanel (190) + gap(16) */
       bottom:0;
       overflow-y:auto;
       -webkit-overflow-scrolling:touch;
       padding:0 4px;
       box-sizing:border-box;
+      background:#fff;
+      z-index:0;
     }
 
     .todo-item{
@@ -416,6 +430,7 @@
                 <div id="upcomingList"></div>
               </div>
 
+              <div id="tasksDivider"></div>
               <div id="todoList"></div>
             </div>
           </div>
