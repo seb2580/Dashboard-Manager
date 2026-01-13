@@ -313,67 +313,6 @@
       text-overflow: ellipsis;
       white-space: nowrap;
     }
-    .upcoming-del {
-      background: none;
-      border: 0;
-      color: var(--accent);
-      font-size: 14px;
-      padding: 0 4px;
-      flex-shrink: 0;
-    }
-    .input-section {
-      margin-bottom: 12px;
-      padding: 0 4px;
-    }
-    .mode-toggle {
-      display: flex;
-      gap: 4px;
-      margin-bottom: 8px;
-    }
-    .mode-btn {
-      flex: 1;
-      padding: 6px 8px;
-      border: 1px solid #000;
-      background: #f0f0f0;
-      font-size: 9px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    .mode-btn.active {
-      background: #000;
-      color: #fff;
-    }
-    .todo-input { 
-      width: 100%; 
-      overflow: hidden;
-    }
-    .todo-input input {
-      width: 72%;
-      box-sizing: border-box;
-      padding: 10px 12px;
-      border: 1px solid #000;
-      border-radius: 4px;
-      font-size: 14px;
-      background: #fff;
-      color: #000;
-    }
-    .todo-input button {
-      width: 26%;
-      float: right;
-      box-sizing: border-box;
-      padding: 10px 12px;
-      border: 1px solid #000;
-      border-radius: 4px;
-      background: #000;
-      color: #fff;
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
     .todo-list {
       overflow: auto;
       -webkit-overflow-scrolling: touch;
@@ -407,15 +346,6 @@
       text-overflow: ellipsis;
       white-space: nowrap;
       margin-left: 6px;
-    }
-    .todo-del {
-      float: right;
-      background: none;
-      border: 0;
-      color: var(--accent);
-      font-size: 18px;
-      padding: 0 6px;
-      margin-top: -2px;
     }
   </style>
 </head>
@@ -474,16 +404,6 @@
                   <div class="upcoming-header">Upcoming</div>
                   <div class="upcoming-compact" id="upcomingList"></div>
                 </div>
-                <div class="input-section">
-                  <div class="mode-toggle">
-                    <button class="mode-btn" id="modeTask">Task</button>
-                    <button class="mode-btn active" id="modeEvent">Event</button>
-                  </div>
-                  <div class="todo-input">
-                    <input id="todoInput" type="text" placeholder="Add an event…" readonly="readonly" />
-                    <button id="todoAddBtn" type="button">Add</button>
-                  </div>
-                </div>
                 <div class="todo-list" id="todoList"></div>
               </div>
             </div>
@@ -493,7 +413,6 @@
     </div>
   </div>
 
-  <!-- Core JavaScript - runs first -->
   <script>
     var LAT = 52.6541;
     var LON = -7.2448;
@@ -503,8 +422,8 @@
     var CLOCK_EVERY_MS = 60 * 1000;
     var WEATHER_EVERY_MS = 15 * 60 * 1000;
     var FORECAST_EVERY_MS = 6 * 60 * 60 * 1000;
+    var FIREBASE_URL = 'https://kobo-dashboard-5039f-default-rtdb.firebaseio.com';
 
-    var inputMode = "event";
     var calendarEvents = [];
     var todos = [];
 
@@ -521,41 +440,6 @@
       try { document.body.offsetHeight; } catch(e) {}
       setTimeout(function(){ try{ document.body.offsetHeight; }catch(e){} }, 50);
     }
-
-    function shouldNudge(ev){
-      var el = ev && ev.target;
-      if (!el || !el.tagName) return true;
-      var t = el.tagName.toLowerCase();
-      return !(t === "input" || t === "textarea");
-    }
-
-    document.addEventListener("click", function(ev){
-      if (shouldNudge(ev)) einkNudge();
-    }, true);
-
-    document.addEventListener("touchend", function(ev){
-      if (shouldNudge(ev)) einkNudge();
-    }, true);
-
-    document.addEventListener("touchmove", function(ev){
-      if (ev.touches && ev.touches.length > 1) ev.preventDefault();
-    }, { passive: false });
-
-    document.getElementById("modeTask").onclick = function(){
-      inputMode = "task";
-      document.getElementById("modeTask").classList.add("active");
-      document.getElementById("modeEvent").classList.remove("active");
-      document.getElementById("todoInput").placeholder = "Add a task…";
-      einkNudge();
-    };
-
-    document.getElementById("modeEvent").onclick = function(){
-      inputMode = "event";
-      document.getElementById("modeEvent").classList.add("active");
-      document.getElementById("modeTask").classList.remove("active");
-      document.getElementById("todoInput").placeholder = "Add an event…";
-      einkNudge();
-    };
 
     function updateClocks(){
       var now = new Date();
@@ -894,68 +778,87 @@
       }
     }
 
-    // Start everything immediately - no Firebase needed for basic display
+    // Fetch events from Firebase REST API
+    function fetchEvents() {
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', FIREBASE_URL + '/events.json', true);
+      xhr.timeout = 10000;
+      
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+          try {
+            var data = JSON.parse(xhr.responseText);
+            calendarEvents = [];
+            
+            if (data) {
+              for (var key in data) {
+                calendarEvents.push({
+                  id: key,
+                  date: new Date(data[key].date),
+                  title: data[key].title
+                });
+              }
+            }
+            
+            renderCalendar();
+          } catch (e) {
+            console.error('Events error:', e);
+          }
+        }
+      };
+      
+      xhr.send();
+    }
+    
+    // Fetch todos from Firebase REST API
+    function fetchTodos() {
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', FIREBASE_URL + '/todos.json', true);
+      xhr.timeout = 10000;
+      
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+          try {
+            var data = JSON.parse(xhr.responseText);
+            todos = [];
+            
+            if (data) {
+              for (var key in data) {
+                todos.push({
+                  id: key,
+                  text: data[key].text,
+                  done: data[key].done || false
+                });
+              }
+            }
+            
+            renderTodos();
+          } catch (e) {
+            console.error('Todos error:', e);
+          }
+        }
+      };
+      
+      xhr.send();
+    }
+
+    // Start everything
     function startTimers(){
       updateClocks();
       renderCalendar();
       updateWeather();
       update7DayForecast();
+      fetchEvents();
+      fetchTodos();
 
       setInterval(updateClocks, CLOCK_EVERY_MS);
       setInterval(updateWeather, WEATHER_EVERY_MS);
       setInterval(update7DayForecast, FORECAST_EVERY_MS);
+      setInterval(fetchEvents, 5 * 60 * 1000); // Refresh events every 5 minutes
+      setInterval(fetchTodos, 5 * 60 * 1000);  // Refresh todos every 5 minutes
     }
 
     startTimers();
-  </script>
-
-  <!-- Firebase SDK - loads after core functionality -->
-  <script type="module">
-    try {
-      const { initializeApp } = await import("https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js");
-      const { getDatabase, ref, onValue } = await import("https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js");
-
-      const firebaseConfig = {
-        apiKey: "AIzaSyD5GG3rCDXRrc2B1CLtBgaIpoTf9G6IyTE",
-        authDomain: "kobo-dashboard-5039f.firebaseapp.com",
-        databaseURL: "https://kobo-dashboard-5039f-default-rtdb.firebaseio.com",
-        projectId: "kobo-dashboard-5039f",
-        storageBucket: "kobo-dashboard-5039f.firebasestorage.app",
-        messagingSenderId: "657055634579",
-        appId: "1:657055634579:web:607002f02e5a5e58772966"
-      };
-
-      const app = initializeApp(firebaseConfig);
-      const database = getDatabase(app);
-
-      const eventsRef = ref(database, 'events');
-      const todosRef = ref(database, 'todos');
-
-      // Listen for Firebase changes
-      onValue(eventsRef, (snapshot) => {
-        const data = snapshot.val();
-        calendarEvents = data ? Object.keys(data).map(key => ({
-          id: key,
-          date: new Date(data[key].date),
-          title: data[key].title
-        })) : [];
-        renderCalendar();
-      });
-
-      onValue(todosRef, (snapshot) => {
-        const data = snapshot.val();
-        todos = data ? Object.keys(data).map(key => ({
-          id: key,
-          text: data[key].text,
-          done: data[key].done || false
-        })) : [];
-        renderTodos();
-      });
-
-      console.log("Firebase connected successfully");
-    } catch (error) {
-      console.error("Firebase failed to load, but dashboard still works:", error);
-    }
   </script>
 </body>
 </html>
