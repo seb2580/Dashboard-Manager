@@ -484,24 +484,23 @@
       }).join('');
     }
 
-    // Render tasks - FIXED: Hides completed tasks
+    // Render tasks
     function renderTasks() {
       const container = document.getElementById('tasksList');
-      const visibleTasks = tasks.filter(task => !task.done); // Only show incomplete tasks
       
-      if (visibleTasks.length === 0) {
+      if (tasks.length === 0) {
         container.innerHTML = '<div class="empty">No tasks yet</div>';
         return;
       }
 
-      container.innerHTML = visibleTasks.map(task => `
-        <div class="item">
+      container.innerHTML = tasks.map(task => `
+        <div class="item ${task.done ? 'done' : ''}">
           <div class="item-content">
             <div class="item-title">${task.text}</div>
           </div>
           <div class="item-actions">
             <button class="btn-icon btn-toggle" onclick="toggleTask('${task.id}')">
-              ✓
+              ${task.done ? '↺' : '✓'}
             </button>
             <button class="btn-icon btn-delete" onclick="deleteTask('${task.id}')">×</button>
           </div>
@@ -561,7 +560,7 @@
       });
     });
 
-    // Delete event (kept confirmation for events)
+    // Delete event
     window.deleteEvent = function(id) {
       if (confirm('Delete this event?')) {
         remove(ref(database, 'events/' + id)).then(() => {
@@ -571,17 +570,17 @@
       }
     };
 
-    // Delete task - FIXED: No confirmation
+    // Delete task
     window.deleteTask = function(id) {
-      remove(ref(database, 'todos/' + id)).then(() => {
-        showStatus('Task deleted');
-        triggerKoboRefresh();
-      }).catch((error) => {
-        showStatus('Error deleting task: ' + error.message, true);
-      });
+      if (confirm('Delete this task?')) {
+        remove(ref(database, 'todos/' + id)).then(() => {
+          showStatus('Task deleted');
+          triggerKoboRefresh();
+        });
+      }
     };
 
-    // Toggle task - FIXED: Completed tasks disappear after toggle
+    // Toggle task
     window.toggleTask = function(id) {
       const task = tasks.find(t => t.id === id);
       if (task) {
