@@ -367,52 +367,63 @@ font-size:11px;
 }
 
 /* =========================================================
-   Layout modes (do nothing unless body has a mode class)
+   Layout modes (only active when body has a mode class)
    ========================================================= */
 
 /* 1) Big Clock + Weather only (VERTICAL, clock on top) */
-body.mode-bigClockWeather .forecast-bar{ display:none; }
-body.mode-bigClockWeather .content{ display:none; }
+body.mode-bigClockWeather .forecast-bar{ display:none !important; }
+body.mode-bigClockWeather .content{ display:none !important; }
 
 body.mode-bigClockWeather .toprow{
-height: calc(100% - (var(--pad) * 2));
-margin-bottom: 0;
+height: calc(100% - (var(--pad) * 2)) !important;
+margin-bottom: 0 !important;
 }
 
-/* Stack the two <td> vertically */
-body.mode-bigClockWeather .toprow table,
-body.mode-bigClockWeather .toprow tr,
+/* Force the table to stop behaving like a table */
+body.mode-bigClockWeather .toprow table{
+display:block !important;
+width:100% !important;
+height:100% !important;
+table-layout:auto !important;
+}
+body.mode-bigClockWeather .toprow tr{
+display:block !important;
+width:100% !important;
+}
 body.mode-bigClockWeather .toprow td{
-display:block;
-width:100%;
+display:block !important;
+width:100% !important;
+float:none !important;
 }
 
-/* Remove split styling so it feels merged */
+/* Ensure clock block is on top */
 body.mode-bigClockWeather .top-left{
-width:100%;
-padding-right:0;
+width:100% !important;
+padding-right:0 !important;
 }
 
+/* Weather block underneath */
 body.mode-bigClockWeather .top-right{
-width:100%;
-border-left:0;
-padding-left:0;
-border-top:2px solid #000;
-padding-top:12px;
-margin-top:10px;
+width:100% !important;
+border-left:0 !important;
+padding-left:0 !important;
+
+border-top:2px solid #000 !important;
+padding-top:12px !important;
+margin-top:10px !important;
 }
 
-/* Make clock the hero */
-body.mode-bigClockWeather .big-clock{ font-size: 130px; }
-body.mode-bigClockWeather .ampm{ font-size: 28px; }
-body.mode-bigClockWeather .date{ font-size: 18px; }
+/* Clock sizing */
+body.mode-bigClockWeather .big-clock{ font-size: 130px !important; }
+body.mode-bigClockWeather .ampm{ font-size: 28px !important; }
+body.mode-bigClockWeather .date{ font-size: 18px !important; }
 
-/* Keep weather readable but secondary */
-body.mode-bigClockWeather .wval{ font-size: 48px; }
-body.mode-bigClockWeather .wdetail{ font-size: 13px; }
-body.mode-bigClockWeather .weather-head{ font-size: 12px; }
+/* Weather sizing */
+body.mode-bigClockWeather .wval{ font-size: 48px !important; }
+body.mode-bigClockWeather .wdetail{ font-size: 13px !important; }
+body.mode-bigClockWeather .weather-head{ font-size: 12px !important; }
 
-/* 2) Agenda focus (clock only at top; no weather/temperature module) */
+/* 2) Agenda focus (clock only at top; no weather module) */
 body.mode-agendaFocus .forecast-bar{ display:none; }
 
 /* Hide the entire weather cell */
@@ -429,7 +440,7 @@ body.mode-agendaFocus .date{ font-size: 12px; margin-bottom: 2px; }
 body.mode-agendaFocus .big-clock{ font-size: 30px; margin-top: 0; }
 body.mode-agendaFocus .ampm{ font-size: 14px; }
 
-/* Give the bottom section a predictable height when forecast is hidden */
+/* Bottom section height */
 body.mode-agendaFocus .content{
 height: calc(100% - 112px);
 }
@@ -534,18 +545,17 @@ try{ document.body.offsetHeight; }catch(e){}
 setTimeout(function(){ try{ document.body.offsetHeight; }catch(e){} }, 50);
 }
 
-/* Layout mode (minimal + Kobo-friendly): read config/layoutMode.json */
+/* Layout mode: read config/layoutMode.json */
 function applyLayoutMode(mode){
 mode = (mode || "original");
 if (mode === currentLayoutMode) return;
 currentLayoutMode = mode;
 
-/* Use className (older browser safe). Body normally has no classes. */
+/* Kobo-friendly: set body class via className */
 if (mode === "bigClockWeather") document.body.className = "mode-bigClockWeather";
 else if (mode === "agendaFocus") document.body.className = "mode-agendaFocus";
 else document.body.className = "";
 
-/* repaint */
 forceEinkRefresh();
 einkNudge();
 }
@@ -1033,7 +1043,6 @@ setInterval(updateClocks, CLOCK_EVERY_MS);
 setInterval(updateWeather, WEATHER_EVERY_MS);
 setInterval(update7DayForecast, FORECAST_EVERY_MS);
 
-/* keep your existing 30s loop; also re-check layoutMode */
 setInterval(function(){
 fetchEvents();
 fetchTodos();
