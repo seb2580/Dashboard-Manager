@@ -1,853 +1,1307 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard Manager</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Dashboard Manager</title>
 
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+<style>
+* {
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-      background: linear-gradient(135deg, #f8fafc 0%, #ffffff 50%, #eff6ff 100%);
-      min-height: 100vh;
-      position: relative;
-      overflow-x: hidden;
-    }
+body {
+font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+background: linear-gradient(135deg, #f8fafc 0%, #ffffff 50%, #eff6ff 100%);
+min-height: 100vh;
+position: relative;
+overflow-x: hidden;
+}
 
-    .bg-decoration { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
-    .bg-blob-1 { position: absolute; top: -160px; right: -160px; width: 320px; height: 320px; background: rgba(59,130,246,.15); border-radius: 50%; filter: blur(80px); }
-    .bg-blob-2 { position: absolute; top: 50%; left: -80px; width: 240px; height: 240px; background: rgba(251,191,36,.12); border-radius: 50%; filter: blur(80px); }
-    .bg-blob-3 { position: absolute; bottom: 80px; right: 25%; width: 160px; height: 160px; background: rgba(16,185,129,.12); border-radius: 50%; filter: blur(80px); }
+.bg-decoration {
+position: fixed;
+inset: 0;
+pointer-events: none;
+overflow: hidden;
+z-index: 0;
+}
 
-    .container { position: relative; max-width: 672px; margin: 0 auto; padding: 24px 12px 80px; z-index: 1; }
+.bg-blob-1 {
+position: absolute;
+top: -160px;
+right: -160px;
+width: 320px;
+height: 320px;
+background: rgba(59, 130, 246, 0.15);
+border-radius: 50%;
+filter: blur(80px);
+}
 
-    .header { text-align: center; margin-bottom: 16px; animation: fadeInDown .5s ease-out; }
-    .badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 16px; background: #0f172a; color: #fff; border-radius: 9999px; font-size: 12px; font-weight: 500; letter-spacing: .5px; margin-bottom: 12px; }
-    .header h1 { font-size: 28px; font-weight: 700; color: #0f172a; margin-bottom: 6px; letter-spacing: -.5px; }
-    .header p { color: #64748b; font-size: 14px; }
+.bg-blob-2 {
+position: absolute;
+top: 50%;
+left: -80px;
+width: 240px;
+height: 240px;
+background: rgba(251, 191, 36, 0.12);
+border-radius: 50%;
+filter: blur(80px);
+}
 
-    .sync-banner {
-      position: relative;
-      background: linear-gradient(135deg, #7c3aed 0%, #9333ea 50%, #6366f1 100%);
-      border-radius: 16px;
-      padding: 16px;
-      margin-bottom: 14px;
-      overflow: hidden;
-      animation: fadeInUp .5s ease-out .1s both;
-    }
-    .sync-banner::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNiIgc3Ryb2tlPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMSkiIHN0cm9rZS13aWR0aD0iMiIvPjwvZz48L3N2Zz4=');
-      opacity: .3;
-    }
-    .sync-content { position: relative; display: flex; flex-direction: column; align-items: stretch; gap: 12px; }
-    .sync-left { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
-    .sync-icon { width: 40px; height: 40px; background: rgba(255,255,255,.1); backdrop-filter: blur(10px); border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .sync-text { min-width: 0; flex: 1; }
-    .sync-text h3 { color: #fff; font-size: 14px; font-weight: 600; margin-bottom: 2px; }
-    .sync-text p { color: rgba(255,255,255,.7); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .btn-refresh {
-      background: rgba(255,255,255,.2);
-      backdrop-filter: blur(10px);
-      border: none;
-      color: #fff;
-      padding: 10px 16px;
-      border-radius: 12px;
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      transition: all .2s;
-      flex-shrink: 0;
-      width: 100%;
-    }
-    .btn-refresh:hover { background: rgba(255,255,255,.3); transform: scale(1.02); }
-    .btn-refresh:active { transform: scale(.98); }
-    .btn-refresh:disabled { opacity: .6; cursor: not-allowed; }
+.bg-blob-3 {
+position: absolute;
+bottom: 80px;
+right: 25%;
+width: 160px;
+height: 160px;
+background: rgba(16, 185, 129, 0.12);
+border-radius: 50%;
+filter: blur(80px);
+}
 
-    .layout-strip {
-      background: rgba(255,255,255,.8);
-      backdrop-filter: blur(16px);
-      border-radius: 16px;
-      box-shadow: 0 20px 40px rgba(0,0,0,.05), 0 0 1px rgba(0,0,0,.1);
-      border: 1px solid rgba(226,232,240,.8);
-      padding: 14px;
-      margin-bottom: 12px;
-      animation: fadeInUp .5s ease-out .12s both;
-    }
+.container {
+position: relative;
+max-width: 672px;
+margin: 0 auto;
+padding: 24px 12px 80px;
+z-index: 1;
+}
 
-    .section-header {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 11px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: .5px;
-      color: #64748b;
-      margin: 6px 0 10px;
-    }
+/* Header */
+.header {
+text-align: center;
+margin-bottom: 24px;
+animation: fadeInDown 0.5s ease-out;
+}
 
-    .layout-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
-    .layout-pill {
-      border: 1px solid #e2e8f0;
-      background: rgba(241,245,249,.9);
-      color: #0f172a;
-      padding: 8px 10px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all .15s;
-      white-space: nowrap;
-    }
-    .layout-pill:hover { border-color: #3b82f6; background: #fff; }
-    .layout-pill.active { background: #0f172a; border-color: #0f172a; color: #fff; }
-    .layout-meta { margin-top: 10px; font-size: 13px; color: #334155; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-    .layout-meta .tag { font-size: 12px; padding: 4px 10px; background: rgba(241,245,249,.9); border: 1px solid #e2e8f0; border-radius: 999px; color: #0f172a; }
+.badge {
+display: inline-flex;
+align-items: center;
+gap: 8px;
+padding: 6px 16px;
+background: #0f172a;
+color: white;
+border-radius: 9999px;
+font-size: 12px;
+font-weight: 500;
+letter-spacing: 0.5px;
+margin-bottom: 16px;
+}
 
-    details.custom-layout {
-      margin-top: 12px;
-      border-top: 1px solid #f1f5f9;
-      padding-top: 12px;
-    }
-    details.custom-layout summary {
-      list-style: none;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      font-weight: 700;
-      color: #0f172a;
-      padding: 10px 12px;
-      border-radius: 12px;
-      background: rgba(241,245,249,.7);
-      border: 1px solid #e2e8f0;
-    }
-    details.custom-layout summary::-webkit-details-marker { display: none; }
-    .hint { margin-top: 10px; font-size: 12px; color: #64748b; line-height: 1.4; }
+.header h1 {
+font-size: 28px;
+font-weight: 700;
+color: #0f172a;
+margin-bottom: 8px;
+letter-spacing: -0.5px;
+}
 
-    .form-group { margin-top: 12px; }
-    label { display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; color: #64748b; margin-bottom: 8px; }
-    select, input[type="text"], input[type="date"], input[type="time"] {
-      width: 100%;
-      padding: 12px 16px;
-      background: rgba(241,245,249,.5);
-      border: 1px solid #e2e8f0;
-      border-radius: 12px;
-      font-size: 16px;
-      color: #0f172a;
-      transition: all .2s;
-      font-family: inherit;
-    }
-    select:focus, input:focus { outline: none; border-color: #3b82f6; background: #fff; box-shadow: 0 0 0 3px rgba(59,130,246,.1); }
+.header p {
+color: #64748b;
+font-size: 14px;
+}
 
-    .btn-primary {
-      width: 100%;
-      padding: 14px;
-      background: #0f172a;
-      color: #fff;
-      border: none;
-      border-radius: 12px;
-      font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      transition: all .2s;
-      margin-top: 12px;
-    }
-    .btn-primary:hover { background: #1e293b; transform: scale(1.01); }
-    .btn-primary:active { transform: scale(.99); }
+/* Sync Banner */
+.sync-banner {
+position: relative;
+background: linear-gradient(135deg, #7c3aed 0%, #9333ea 50%, #6366f1 100%);
+border-radius: 16px;
+padding: 16px;
+margin-bottom: 20px;
+overflow: hidden;
+animation: fadeInUp 0.5s ease-out 0.1s both;
+}
 
-    .main-card {
-      background: rgba(255,255,255,.8);
-      backdrop-filter: blur(20px);
-      border-radius: 16px;
-      box-shadow: 0 20px 40px rgba(0,0,0,.05), 0 0 1px rgba(0,0,0,.1);
-      border: 1px solid rgba(226,232,240,.8);
-      overflow: hidden;
-      animation: fadeInUp .5s ease-out .15s both;
-    }
+.sync-banner::before {
+content: '';
+position: absolute;
+inset: 0;
+background: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNiIgc3Ryb2tlPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMSkiIHN0cm9rZS13aWR0aD0iMiIvPjwvZz48L3N2Zz4=');
+opacity: 0.3;
+}
 
-    .tabs-container { padding: 16px; border-bottom: 1px solid #f1f5f9; }
-    .tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; background: rgba(241,245,249,.8); padding: 4px; border-radius: 12px; }
-    .tab-btn {
-      display: flex; align-items: center; justify-content: center; gap: 8px;
-      padding: 12px; border: none; background: transparent; border-radius: 8px;
-      font-size: 14px; font-weight: 600; color: #64748b; cursor: pointer;
-      transition: all .2s;
-    }
-    .tab-btn.active { background: #fff; color: #0f172a; box-shadow: 0 2px 4px rgba(0,0,0,.05); }
+.sync-content {
+position: relative;
+display: flex;
+flex-direction: column;
+align-items: stretch;
+gap: 12px;
+}
 
-    .tab-content { display: none; padding: 16px; }
-    .tab-content.active { display: block; animation: tabFadeIn .25s ease-out; }
+.sync-left {
+display: flex;
+align-items: center;
+gap: 12px;
+flex: 1;
+min-width: 0;
+}
 
-    .datetime-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 12px; }
+.sync-icon {
+width: 40px;
+height: 40px;
+background: rgba(255, 255, 255, 0.1);
+backdrop-filter: blur(10px);
+border-radius: 12px;
+display: flex;
+align-items: center;
+justify-content: center;
+flex-shrink: 0;
+}
 
-    .items-list { display: flex; flex-direction: column; gap: 8px; }
+.sync-text {
+min-width: 0;
+flex: 1;
+}
 
-    .event-card, .task-card {
-      position: relative;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px;
-      background: #fff;
-      border: 1px solid #e2e8f0;
-      border-radius: 12px;
-      transition: all .2s;
-    }
+.sync-text h3 {
+color: white;
+font-size: 14px;
+font-weight: 600;
+margin-bottom: 2px;
+}
 
-    .event-card:hover { border-color: #bfdbfe; box-shadow: 0 4px 12px rgba(59,130,246,.1); }
-    .task-card:hover { border-color: #86efac; box-shadow: 0 4px 12px rgba(16,185,129,.1); }
+.sync-text p {
+color: rgba(255, 255, 255, 0.7);
+font-size: 12px;
+overflow: hidden;
+text-overflow: ellipsis;
+white-space: nowrap;
+}
 
-    .event-date-badge {
-      width: 52px; height: 52px; border-radius: 12px;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      flex-shrink: 0;
-      background: linear-gradient(135deg, #3b82f6, #2563eb);
-      color: #fff;
-    }
-    .event-date-badge .day { font-size: 18px; font-weight: 800; line-height: 1; }
-    .event-date-badge .month { font-size: 10px; opacity: .8; margin-top: 2px; letter-spacing: .5px; text-transform: uppercase; }
+.btn-refresh {
+background: rgba(255, 255, 255, 0.2);
+backdrop-filter: blur(10px);
+border: none;
+color: white;
+padding: 10px 16px;
+border-radius: 12px;
+font-size: 14px;
+font-weight: 500;
+cursor: pointer;
+display: flex;
+align-items: center;
+justify-content: center;
+gap: 8px;
+transition: all 0.2s;
+flex-shrink: 0;
+width: 100%;
+}
 
-    .event-content, .task-content { flex: 1; min-width: 0; }
-    .event-title { font-size: 15px; font-weight: 700; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .event-sub { margin-top: 2px; font-size: 12px; color: #64748b; }
+.btn-refresh:hover {
+background: rgba(255, 255, 255, 0.3);
+transform: scale(1.05);
+}
 
-    .task-checkbox {
-      width: 38px; height: 38px; border-radius: 12px;
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer;
-      background: #f1f5f9;
-      border: 2px solid #e2e8f0;
-      flex-shrink: 0;
-      transition: all .2s;
-    }
-    .task-checkbox:hover { background: #d1fae5; border-color: #86efac; }
-    .task-dot { width: 12px; height: 12px; border-radius: 50%; background: #94a3b8; }
+.btn-refresh:active {
+transform: scale(0.95);
+}
 
-    .btn-icon {
-      width: 34px; height: 34px; border: none; background: transparent;
-      border-radius: 10px; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      transition: all .15s;
-      color: #64748b;
-      flex-shrink: 0;
-    }
-    .btn-icon:hover { background: #fef2f2; color: #ef4444; }
+.btn-refresh:disabled {
+opacity: 0.6;
+cursor: not-allowed;
+}
 
-    .empty-state { padding: 34px 20px; text-align: center; color: #94a3b8; font-size: 13px; }
+/* Main Card */
+.main-card {
+background: rgba(255, 255, 255, 0.8);
+backdrop-filter: blur(20px);
+border-radius: 16px;
+box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05), 0 0 1px rgba(0, 0, 0, 0.1);
+border: 1px solid rgba(226, 232, 240, 0.8);
+overflow: hidden;
+animation: fadeInUp 0.5s ease-out 0.15s both;
+}
 
-    .toast {
-      position: fixed; top: 20px; right: 20px; left: 20px;
-      background: #fff; padding: 14px 16px;
-      border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,.15);
-      border-left: 4px solid #10b981;
-      font-size: 14px; font-weight: 600; color: #0f172a;
-      z-index: 1000; max-width: 320px; margin: 0 auto;
-      animation: slideInRight .25s ease-out;
-    }
-    .toast.error { border-left-color: #ef4444; }
+/* Tabs */
+.tabs-container {
+padding: 16px;
+border-bottom: 1px solid #f1f5f9;
+}
 
-    .icon { width: 16px; height: 16px; stroke: currentColor; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
-    .icon-sm { width: 14px; height: 14px; }
-    .icon-md { width: 20px; height: 20px; }
+.tabs {
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 4px;
+background: rgba(241, 245, 249, 0.8);
+padding: 4px;
+border-radius: 12px;
+}
 
-    @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes tabFadeIn { from { opacity: 0; } to { opacity: 1; } }
-    @keyframes slideInRight { from { opacity: 0; transform: translateX(100px); } to { opacity: 1; transform: translateX(0); } }
-    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-    .spin { animation: spin 1s linear infinite; }
+.tab-btn {
+display: flex;
+align-items: center;
+justify-content: center;
+gap: 8px;
+padding: 12px;
+border: none;
+background: transparent;
+border-radius: 8px;
+font-size: 14px;
+font-weight: 500;
+color: #64748b;
+cursor: pointer;
+transition: all 0.2s;
+}
 
-    @media (min-width: 640px) {
-      .container { padding: 32px 16px 96px; }
-      .header h1 { font-size: 36px; }
-      .sync-content { flex-direction: row; align-items: center; justify-content: space-between; }
-      .btn-refresh { width: auto; }
-      .tab-content { padding: 20px; }
-      .event-card, .task-card { padding: 14px; gap: 14px; }
-      .toast { left: auto; margin: 0; }
-    }
-  </style>
+.tab-btn.active {
+background: white;
+color: #0f172a;
+box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.tab-content {
+display: none;
+padding: 16px;
+}
+
+.tab-content.active {
+display: block;
+animation: tabFadeIn 0.3s ease-out;
+}
+
+/* Forms */
+.form-group {
+margin-bottom: 16px;
+}
+
+label {
+display: block;
+font-size: 11px;
+font-weight: 600;
+text-transform: uppercase;
+letter-spacing: 0.5px;
+color: #64748b;
+margin-bottom: 8px;
+}
+
+input[type="text"],
+input[type="date"],
+input[type="time"] {
+width: 100%;
+padding: 12px 16px;
+background: rgba(241, 245, 249, 0.5);
+border: 1px solid #e2e8f0;
+border-radius: 12px;
+font-size: 16px;
+color: #0f172a;
+transition: all 0.2s;
+}
+
+input:focus {
+outline: none;
+border-color: #3b82f6;
+background: white;
+box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.datetime-grid {
+display: grid;
+grid-template-columns: 2fr 1fr;
+gap: 12px;
+}
+
+.btn-primary {
+width: 100%;
+padding: 14px;
+background: #0f172a;
+color: white;
+border: none;
+border-radius: 12px;
+font-size: 14px;
+font-weight: 600;
+cursor: pointer;
+display: flex;
+align-items: center;
+justify-content: center;
+gap: 8px;
+transition: all 0.2s;
+}
+
+.btn-primary:hover {
+background: #1e293b;
+transform: scale(1.02);
+}
+
+.btn-primary:active {
+transform: scale(0.98);
+}
+
+/* Section Headers */
+.section-header {
+display: flex;
+align-items: center;
+gap: 8px;
+font-size: 11px;
+font-weight: 600;
+text-transform: uppercase;
+letter-spacing: 0.5px;
+color: #64748b;
+margin: 20px 0 12px;
+}
+
+/* Items List */
+.items-list {
+display: flex;
+flex-direction: column;
+gap: 8px;
+}
+
+/* Event Card */
+.event-card {
+position: relative;
+display: flex;
+align-items: center;
+gap: 12px;
+padding: 12px;
+background: linear-gradient(to right, white, rgba(248, 250, 252, 0.5));
+border: 1px solid #e2e8f0;
+border-radius: 12px;
+overflow: hidden;
+transition: all 0.3s;
+animation: slideInUp 0.3s ease-out both;
+}
+
+.event-card:hover {
+border-color: #bfdbfe;
+box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+}
+
+.event-card.past {
+background: rgba(248, 250, 252, 0.5);
+border-color: rgba(226, 232, 240, 0.5);
+opacity: 0.6;
+}
+
+.event-card:hover::after {
+content: '';
+position: absolute;
+bottom: 0;
+left: 0;
+right: 0;
+height: 2px;
+background: linear-gradient(to right, #3b82f6, #a855f7, #3b82f6);
+opacity: 0;
+transition: opacity 0.3s;
+}
+
+.event-card:not(.past):hover::after {
+opacity: 1;
+}
+
+.event-date-badge {
+width: 48px;
+height: 48px;
+border-radius: 12px;
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+flex-shrink: 0;
+background: linear-gradient(135deg, #3b82f6, #2563eb);
+box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.event-card.past .event-date-badge {
+background: #f1f5f9;
+box-shadow: none;
+}
+
+.event-date-badge .day {
+font-size: 16px;
+font-weight: 700;
+color: white;
+line-height: 1;
+}
+
+.event-card.past .event-date-badge .day {
+color: #94a3b8;
+}
+
+.event-date-badge .month {
+font-size: 9px;
+font-weight: 500;
+text-transform: uppercase;
+letter-spacing: 0.5px;
+color: rgba(255, 255, 255, 0.7);
+margin-top: 2px;
+}
+
+.event-card.past .event-date-badge .month {
+color: #94a3b8;
+}
+
+.event-content {
+flex: 1;
+min-width: 0;
+}
+
+.event-title {
+font-size: 14px;
+font-weight: 600;
+color: #0f172a;
+margin-bottom: 4px;
+white-space: nowrap;
+overflow: hidden;
+text-overflow: ellipsis;
+}
+
+.event-card.past .event-title {
+text-decoration: line-through;
+color: #94a3b8;
+}
+
+.event-datetime {
+display: flex;
+align-items: flex-start;
+gap: 6px;
+font-size: 12px;
+color: #64748b;
+}
+
+.event-datetime svg {
+flex-shrink: 0;
+margin-top: 2px;
+}
+
+.event-datetime-text {
+flex: 1;
+min-width: 0;
+line-height: 1.4;
+}
+
+.btn-delete {
+width: 32px;
+height: 32px;
+border: none;
+background: transparent;
+border-radius: 8px;
+cursor: pointer;
+display: flex;
+align-items: center;
+justify-content: center;
+transition: all 0.2s;
+flex-shrink: 0;
+}
+
+.btn-delete:hover {
+background: #fef2f2;
+color: #ef4444;
+}
+
+/* Task Card */
+.task-card {
+position: relative;
+display: flex;
+align-items: center;
+gap: 12px;
+padding: 12px;
+background: white;
+border: 1px solid #e2e8f0;
+border-radius: 12px;
+transition: all 0.3s;
+animation: slideInUp 0.3s ease-out both;
+}
+
+.task-card:hover {
+border-color: #86efac;
+box-shadow: 0 4px 12px rgba(16, 185, 129, 0.1);
+}
+
+.task-card.done {
+background: rgba(236, 253, 245, 0.5);
+border-color: rgba(167, 243, 208, 0.5);
+}
+
+.task-card.done::before {
+content: '';
+position: absolute;
+left: 0;
+top: 0;
+bottom: 0;
+width: 4px;
+background: linear-gradient(to bottom, #34d399, #10b981);
+border-radius: 12px 0 0 12px;
+}
+
+.task-checkbox {
+width: 36px;
+height: 36px;
+border-radius: 12px;
+display: flex;
+align-items: center;
+justify-content: center;
+cursor: pointer;
+transition: all 0.3s;
+flex-shrink: 0;
+background: #f1f5f9;
+border: 2px solid #e2e8f0;
+}
+
+.task-checkbox:hover {
+background: #d1fae5;
+border-color: #86efac;
+}
+
+.task-card.done .task-checkbox {
+background: #10b981;
+border-color: #10b981;
+box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.task-checkbox .checkmark {
+display: none;
+}
+
+.task-card.done .task-checkbox .checkmark {
+display: block;
+}
+
+.task-checkbox .dot {
+width: 10px;
+height: 10px;
+background: #cbd5e1;
+border-radius: 50%;
+}
+
+.task-card.done .task-checkbox .dot {
+display: none;
+}
+
+.task-text {
+flex: 1;
+font-size: 14px;
+font-weight: 500;
+color: #0f172a;
+transition: all 0.3s;
+word-break: break-word;
+min-width: 0;
+}
+
+.task-card.done .task-text {
+text-decoration: line-through;
+color: #94a3b8;
+}
+
+.task-actions {
+display: flex;
+gap: 4px;
+flex-shrink: 0;
+}
+
+.btn-undo {
+width: 32px;
+height: 32px;
+border: none;
+background: transparent;
+border-radius: 8px;
+cursor: pointer;
+display: flex;
+align-items: center;
+justify-content: center;
+transition: all 0.2s;
+color: #94a3b8;
+}
+
+.btn-undo:hover {
+background: #fef3c7;
+color: #f59e0b;
+}
+
+/* Empty State */
+.empty-state {
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+padding: 48px 24px;
+animation: fadeIn 0.5s ease-out;
+}
+
+.empty-icon {
+width: 64px;
+height: 64px;
+border-radius: 16px;
+display: flex;
+align-items: center;
+justify-content: center;
+margin-bottom: 16px;
+}
+
+.empty-icon.events {
+background: linear-gradient(135deg, #dbeafe, #c7d2fe);
+}
+
+.empty-icon.tasks {
+background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+}
+
+.empty-state h4 {
+font-size: 14px;
+font-weight: 600;
+color: #475569;
+margin-bottom: 4px;
+}
+
+.empty-state p {
+font-size: 13px;
+color: #cbd5e1;
+text-align: center;
+}
+
+/* Toast */
+.toast {
+position: fixed;
+top: 20px;
+right: 20px;
+left: 20px;
+background: white;
+padding: 16px 20px;
+border-radius: 12px;
+box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+border-left: 4px solid #10b981;
+font-size: 14px;
+font-weight: 500;
+color: #0f172a;
+z-index: 1000;
+animation: slideInRight 0.3s ease-out;
+max-width: 300px;
+margin: 0 auto;
+}
+
+.toast.error {
+border-left-color: #ef4444;
+}
+
+/* Icons */
+.icon {
+width: 16px;
+height: 16px;
+stroke: currentColor;
+stroke-width: 2;
+fill: none;
+stroke-linecap: round;
+stroke-linejoin: round;
+}
+
+.icon-sm {
+width: 14px;
+height: 14px;
+}
+
+.icon-md {
+width: 20px;
+height: 20px;
+}
+
+.icon-lg {
+width: 24px;
+height: 24px;
+}
+
+/* Animations */
+@keyframes fadeInDown {
+from {
+opacity: 0;
+transform: translateY(-20px);
+}
+to {
+opacity: 1;
+transform: translateY(0);
+}
+}
+
+@keyframes fadeInUp {
+from {
+opacity: 0;
+transform: translateY(20px);
+}
+to {
+opacity: 1;
+transform: translateY(0);
+}
+}
+
+@keyframes tabFadeIn {
+from {
+opacity: 0;
+}
+to {
+opacity: 1;
+}
+}
+
+@keyframes slideInUp {
+from {
+opacity: 0;
+transform: translateY(10px);
+}
+to {
+opacity: 1;
+transform: translateY(0);
+}
+}
+
+@keyframes slideInRight {
+from {
+opacity: 0;
+transform: translateX(100px);
+}
+to {
+opacity: 1;
+transform: translateX(0);
+}
+}
+
+@keyframes fadeIn {
+from {
+opacity: 0;
+}
+to {
+opacity: 1;
+}
+}
+
+@keyframes spin {
+from {
+transform: rotate(0deg);
+}
+to {
+transform: rotate(360deg);
+}
+}
+
+.spin {
+animation: spin 1s linear infinite;
+}
+
+/* Responsive */
+@media (min-width: 640px) {
+.container {
+padding: 32px 16px 96px;
+}
+
+.header h1 {
+font-size: 36px;
+}
+
+.sync-banner {
+padding: 20px;
+margin-bottom: 24px;
+}
+
+.sync-content {
+flex-direction: row;
+align-items: center;
+justify-content: space-between;
+}
+
+.btn-refresh {
+width: auto;
+}
+
+.tab-content {
+padding: 20px;
+}
+
+.event-card,
+.task-card {
+padding: 16px;
+gap: 16px;
+}
+
+.event-date-badge {
+width: 56px;
+height: 56px;
+}
+
+.event-date-badge .day {
+font-size: 18px;
+}
+
+.event-date-badge .month {
+font-size: 10px;
+}
+
+.event-title {
+font-size: 16px;
+}
+
+.event-datetime {
+font-size: 13px;
+align-items: center;
+}
+
+.event-datetime svg {
+margin-top: 0;
+}
+
+.task-checkbox {
+width: 40px;
+height: 40px;
+}
+
+.task-checkbox .dot {
+width: 12px;
+height: 12px;
+}
+
+.task-text {
+font-size: 15px;
+}
+
+.btn-delete,
+.btn-undo {
+width: 36px;
+height: 36px;
+}
+
+.toast {
+left: auto;
+margin: 0;
+}
+
+.section-header {
+margin: 24px 0 12px;
+}
+}
+</style>
 </head>
 
 <body>
-  <div class="bg-decoration">
-    <div class="bg-blob-1"></div>
-    <div class="bg-blob-2"></div>
-    <div class="bg-blob-3"></div>
-  </div>
-
-  <div class="container">
-    <header class="header">
-      <div class="badge">
-        <svg class="icon-sm" viewBox="0 0 24 24">
-          <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
-        </svg>
-        Dashboard Manager
-      </div>
-      <h1>Manage Your Day</h1>
-      <p>Layouts at the top, then events + tasks</p>
-    </header>
-
-    <div class="sync-banner">
-      <div class="sync-content">
-        <div class="sync-left">
-          <div class="sync-icon">
-            <svg class="icon-md" viewBox="0 0 24 24" stroke="white">
-              <path d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-          </div>
-          <div class="sync-text">
-            <h3>Kobo Dashboard Sync</h3>
-            <p>Trigger refresh on your Kobo device</p>
-          </div>
-        </div>
-        <button class="btn-refresh" onclick="triggerKoboRefresh()">
-          <svg class="icon" id="refreshIcon" viewBox="0 0 24 24">
-            <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
-          </svg>
-          <span id="refreshText">Refresh</span>
-        </button>
-      </div>
-    </div>
-
-    <div class="layout-strip">
-      <div class="section-header">
-        <svg class="icon-sm" viewBox="0 0 24 24">
-          <rect x="3" y="3" width="7" height="7" />
-          <rect x="14" y="3" width="7" height="7" />
-          <rect x="14" y="14" width="7" height="7" />
-          <rect x="3" y="14" width="7" height="7" />
-        </svg>
-        Layout presets
-      </div>
-
-      <div class="layout-buttons" id="layoutsGrid"></div>
-
-      <div class="layout-meta">
-        <span class="tag">Current:</span>
-        <span id="currentLayoutDisplay" class="tag">Loading…</span>
-      </div>
-
-      <details class="custom-layout">
-        <summary>
-          <span>Custom layout (advanced)</span>
-          <span style="font-weight:700;color:#64748b;font-size:12px;">Tap to edit</span>
-        </summary>
-
-        <div class="hint">
-          Select modules for up to 3 slides. Leave a slide empty to skip it.
-        </div>
-
-        <div class="form-group">
-          <label>Slide 1 Modules</label>
-          <select id="slide1" multiple size="5">
-            <option value="clock">Clock & Date</option>
-            <option value="weather">Weather</option>
-            <option value="forecast">Forecast</option>
-            <option value="calendar">Calendar</option>
-            <option value="tasks">Tasks & Events</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label>Slide 2 Modules</label>
-          <select id="slide2" multiple size="5">
-            <option value="clock">Clock & Date</option>
-            <option value="weather">Weather</option>
-            <option value="forecast">Forecast</option>
-            <option value="calendar">Calendar</option>
-            <option value="tasks">Tasks & Events</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label>Slide 3 Modules</label>
-          <select id="slide3" multiple size="5">
-            <option value="clock">Clock & Date</option>
-            <option value="weather">Weather</option>
-            <option value="forecast">Forecast</option>
-            <option value="calendar">Calendar</option>
-            <option value="tasks">Tasks & Events</option>
-          </select>
-        </div>
-
-        <button class="btn-primary" onclick="saveCustomLayout()">
-          <svg class="icon" viewBox="0 0 24 24">
-            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
-            <polyline points="17 21 17 13 7 13 7 21" />
-            <polyline points="7 3 7 8 15 8" />
-          </svg>
-          Save Custom Layout
-        </button>
-      </details>
-    </div>
-
-    <div class="main-card">
-      <div class="tabs-container">
-        <div class="tabs">
-          <button class="tab-btn active" onclick="switchTab('events')">
-            <svg class="icon" viewBox="0 0 24 24">
-              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-              <line x1="16" y1="2" x2="16" y2="6" />
-              <line x1="8" y1="2" x2="8" y2="6" />
-              <line x1="3" y1="10" x2="21" y2="10" />
-            </svg>
-            Events
-          </button>
-          <button class="tab-btn" onclick="switchTab('tasks')">
-            <svg class="icon" viewBox="0 0 24 24">
-              <path d="M9 11l3 3L22 4" />
-              <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
-            </svg>
-            Tasks
-          </button>
-        </div>
-      </div>
-
-      <div id="eventsTab" class="tab-content active">
-        <form id="eventForm" onsubmit="addEvent(event)">
-          <div class="form-group">
-            <label>Event Title</label>
-            <input type="text" id="eventTitle" placeholder="Team meeting, doctor appointment..." required />
-          </div>
-
-          <div class="datetime-grid">
-            <div class="form-group">
-              <label>Date</label>
-              <input type="date" id="eventDate" required />
-            </div>
-            <div class="form-group">
-              <label>Time</label>
-              <input type="time" id="eventTime" value="12:00" />
-            </div>
-          </div>
-
-          <button type="submit" class="btn-primary">
-            <svg class="icon" viewBox="0 0 24 24">
-              <line x1="12" y1="5" x2="12" y2="19" />
-              <line x1="5" y1="12" x2="19" y2="12" />
-            </svg>
-            Add Event
-          </button>
-        </form>
-
-        <div class="section-header" style="margin-top:18px;">
-          <svg class="icon-sm" viewBox="0 0 24 24">
-            <circle cx="12" cy="12" r="10" />
-            <polyline points="12 6 12 12 16 14" />
-          </svg>
-          Upcoming Events
-        </div>
-        <div id="eventsList" class="items-list"></div>
-      </div>
-
-      <div id="tasksTab" class="tab-content">
-        <form id="taskForm" onsubmit="addTask(event)">
-          <div class="form-group">
-            <label>Task Description</label>
-            <input type="text" id="taskText" placeholder="Buy groceries, finish report..." required />
-          </div>
-
-          <button type="submit" class="btn-primary">
-            <svg class="icon" viewBox="0 0 24 24">
-              <line x1="12" y1="5" x2="12" y2="19" />
-              <line x1="5" y1="12" x2="19" y2="12" />
-            </svg>
-            Add Task
-          </button>
-        </form>
-
-        <div class="section-header" style="margin-top:18px;">
-          <svg class="icon-sm" viewBox="0 0 24 24">
-            <path d="M9 11l3 3L22 4" />
-            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
-          </svg>
-          Your Tasks
-        </div>
-        <div id="tasksList" class="items-list"></div>
-
-        <details style="margin-top:12px;">
-          <summary style="cursor:pointer;color:#64748b;font-size:13px;font-weight:700;">Completed (tap to show)</summary>
-          <div id="doneTasksList" class="items-list" style="margin-top:10px;"></div>
-        </details>
-      </div>
-    </div>
-  </div>
-
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-    import { getDatabase, ref, set, onValue, push, remove, update } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyD5GG3rCDXRrc2B1CLtBgaIpoTf9G6IyTE",
-      authDomain: "kobo-dashboard-5039f.firebaseapp.com",
-      databaseURL: "https://kobo-dashboard-5039f-default-rtdb.firebaseio.com",
-      projectId: "kobo-dashboard-5039f",
-      storageBucket: "kobo-dashboard-5039f.firebasestorage.app",
-      messagingSenderId: "657055634579",
-      appId: "1:657055634579:web:607002f02e5a5e58772966"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const database = getDatabase(app);
-
-    const eventsRef = ref(database, 'events');
-    const todosRef = ref(database, 'todos');
-    const refreshTriggerRef = ref(database, 'refreshTrigger');
-    const layoutRef = ref(database, 'config/layout');
-
-    const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-    const days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-
-    const LAYOUTS = {
-      full: {
-        name: "Full",
-        desc: "All modules",
-        config: { slides: [{ layout: "full", modules: ["clock","weather","forecast","calendar","tasks"] }] }
-      },
-      twoSlide: {
-        name: "2-Slide",
-        desc: "Clock+Weather / Calendar+Tasks",
-        config: { slides: [
-          { layout: "clock-weather", modules: ["clock","weather"] },
-          { layout: "calendar-tasks", modules: ["calendar","tasks"] }
-        ]}
-      },
-      clockWeather: {
-        name: "Clock+Weather",
-        desc: "Minimal",
-        config: { slides: [{ layout: "clock-weather", modules: ["clock","weather"] }] }
-      },
-      calendarTasks: {
-        name: "Calendar+Tasks",
-        desc: "Agenda",
-        config: { slides: [{ layout: "calendar-tasks", modules: ["calendar","tasks"] }] }
-      },
-      forecast: {
-        name: "Forecast",
-        desc: "Weather focus",
-        config: { slides: [{ layout: "weather-forecast", modules: ["weather","forecast"] }] }
-      }
-    };
-
-    let events = [];
-    let tasks = [];
-    let currentLayout = LAYOUTS.full.config;
-
-    window.switchTab = function(tab) {
-      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-
-      if (tab === 'events') {
-        document.querySelectorAll('.tab-btn')[0].classList.add('active');
-        document.getElementById('eventsTab').classList.add('active');
-      } else {
-        document.querySelectorAll('.tab-btn')[1].classList.add('active');
-        document.getElementById('tasksTab').classList.add('active');
-      }
-    };
-
-    function showToast(message, isError = false) {
-      const toast = document.createElement('div');
-      toast.className = 'toast' + (isError ? ' error' : '');
-      toast.textContent = message;
-      document.body.appendChild(toast);
-      setTimeout(() => toast.remove(), 2500);
-    }
-
-    function escapeHTML(str) {
-      return String(str)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-    }
-
-    function initLayoutsGrid() {
-      const grid = document.getElementById('layoutsGrid');
-      if (!grid) return;
-
-      grid.innerHTML = '';
-      for (const key in LAYOUTS) {
-        const layout = LAYOUTS[key];
-        const isActive = currentLayout && JSON.stringify(currentLayout) === JSON.stringify(layout.config);
-
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'layout-pill' + (isActive ? ' active' : '');
-        btn.textContent = layout.name;
-        btn.onclick = () => setLayout(key);
-        grid.appendChild(btn);
-      }
-    }
-
-    function updateLayoutDisplay() {
-      let displayName = 'Custom';
-      for (const key in LAYOUTS) {
-        if (JSON.stringify(LAYOUTS[key].config) === JSON.stringify(currentLayout)) {
-          displayName = LAYOUTS[key].name;
-          break;
-        }
-      }
-      document.getElementById('currentLayoutDisplay').textContent = displayName;
-    }
-
-    function setLayout(layoutKey) {
-      const layout = LAYOUTS[layoutKey];
-      if (!layout) return;
-
-      set(layoutRef, layout.config).then(() => {
-        showToast('Layout updated!');
-        triggerKoboRefresh();
-      }).catch(err => showToast('Error: ' + err.message, true));
-    }
-
-    window.saveCustomLayout = function() {
-      const slides = [];
-      const selects = [document.getElementById('slide1'), document.getElementById('slide2'), document.getElementById('slide3')];
-
-      for (let i = 0; i < selects.length; i++) {
-        const selected = Array.from(selects[i].selectedOptions).map(opt => opt.value);
-        if (selected.length > 0) slides.push({ layout: "custom", modules: selected });
-      }
-
-      if (slides.length === 0) {
-        showToast('Select at least one module for a slide', true);
-        return;
-      }
-
-      set(layoutRef, { slides }).then(() => {
-        showToast('Custom layout saved!');
-        triggerKoboRefresh();
-      }).catch(err => showToast('Error: ' + err.message, true));
-    };
-
-    window.triggerKoboRefresh = function() {
-      const icon = document.getElementById('refreshIcon');
-      const text = document.getElementById('refreshText');
-      const btn = document.querySelector('.btn-refresh');
-
-      btn.disabled = true;
-      icon.classList.add('spin');
-      text.textContent = 'Syncing...';
-
-      set(refreshTriggerRef, { timestamp: Date.now(), trigger: Math.random() })
-        .then(() => {
-          showToast('Refresh signal sent!');
-          setTimeout(() => {
-            btn.disabled = false;
-            icon.classList.remove('spin');
-            text.textContent = 'Refresh';
-          }, 900);
-        })
-        .catch((error) => {
-          showToast('Error: ' + error.message, true);
-          btn.disabled = false;
-          icon.classList.remove('spin');
-          text.textContent = 'Refresh';
-        });
-    };
-
-    onValue(layoutRef, (snapshot) => {
-      const data = snapshot.val();
-      currentLayout = data || LAYOUTS.full.config;
-      initLayoutsGrid();
-      updateLayoutDisplay();
-    });
-
-    // Ensure presets show immediately (even before Firebase returns)
-    initLayoutsGrid();
-    updateLayoutDisplay();
-
-    onValue(eventsRef, (snapshot) => {
-      const data = snapshot.val();
-      events = data ? Object.keys(data).map(key => ({
-        id: key,
-        ...data[key],
-        date: new Date(data[key].date)
-      })) : [];
-      events.sort((a, b) => a.date - b.date);
-      renderEvents();
-    });
-
-    onValue(todosRef, (snapshot) => {
-      const data = snapshot.val();
-      tasks = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })) : [];
-      renderTasks();
-    });
-
-    function renderEvents() {
-      const container = document.getElementById('eventsList');
-      if (!container) return;
-
-      if (events.length === 0) {
-        container.innerHTML = `<div class="empty-state">No events yet</div>`;
-        return;
-      }
-
-      const now = new Date();
-
-      container.innerHTML = events.map((ev) => {
-        const d = ev.date;
-        const dateStr = `${days[d.getDay()]}, ${months[d.getMonth()]} ${d.getDate()}`;
-        const timeStr = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-        const isPast = d < now;
-
-        return `
-          <div class="event-card" style="opacity:${isPast ? 0.6 : 1}">
-            <div class="event-date-badge">
-              <div class="day">${d.getDate()}</div>
-              <div class="month">${months[d.getMonth()]}</div>
-            </div>
-            <div class="event-content">
-              <div class="event-title">${escapeHTML(ev.title)}</div>
-              <div class="event-sub">${escapeHTML(dateStr)} · ${escapeHTML(timeStr)}</div>
-            </div>
-            <button class="btn-icon" title="Delete" onclick="deleteEvent('${ev.id}')">
-              <svg class="icon" viewBox="0 0 24 24">
-                <polyline points="3 6 5 6 21 6" />
-                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-              </svg>
-            </button>
-          </div>
-        `;
-      }).join('');
-    }
-
-    function renderTasks() {
-      const container = document.getElementById('tasksList');
-      const doneContainer = document.getElementById('doneTasksList');
-      if (!container || !doneContainer) return;
-
-      const open = tasks.filter(t => !t.done);
-      const done = tasks.filter(t => !!t.done);
-
-      if (open.length === 0) {
-        container.innerHTML = `<div class="empty-state">No tasks yet</div>`;
-      } else {
-        container.innerHTML = open.map((task) => `
-          <div class="task-card">
-            <div class="task-checkbox" onclick="toggleTask('${task.id}')">
-              <div class="task-dot"></div>
-            </div>
-            <div class="task-content">
-              <div class="event-title" style="white-space:normal;">${escapeHTML(task.text)}</div>
-            </div>
-            <button class="btn-icon" title="Delete" onclick="deleteTask('${task.id}')">
-              <svg class="icon" viewBox="0 0 24 24">
-                <polyline points="3 6 5 6 21 6" />
-                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-              </svg>
-            </button>
-          </div>
-        `).join('');
-      }
-
-      if (done.length === 0) {
-        doneContainer.innerHTML = `<div class="empty-state" style="padding:10px 0;">No completed tasks</div>`;
-      } else {
-        doneContainer.innerHTML = done.map((task) => `
-          <div class="task-card" style="opacity:.7">
-            <div class="task-checkbox" onclick="toggleTask('${task.id}')" style="background:#10b981;border-color:#10b981;">
-              <svg class="icon" viewBox="0 0 24 24" stroke="white">
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
-            </div>
-            <div class="task-content">
-              <div class="event-title" style="white-space:normal;text-decoration:line-through;color:#94a3b8;">${escapeHTML(task.text)}</div>
-              <div class="event-sub">Tap ✓ to restore</div>
-            </div>
-            <button class="btn-icon" title="Delete" onclick="deleteTask('${task.id}')">
-              <svg class="icon" viewBox="0 0 24 24">
-                <polyline points="3 6 5 6 21 6" />
-                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-              </svg>
-            </button>
-          </div>
-        `).join('');
-      }
-    }
-
-    window.addEvent = function(e) {
-      e.preventDefault();
-
-      const title = document.getElementById('eventTitle').value.trim();
-      const dateValue = document.getElementById('eventDate').value;
-      const timeValue = document.getElementById('eventTime').value || '12:00';
-
-      if (!title || !dateValue) {
-        showToast('Please fill in all required fields', true);
-        return;
-      }
-
-      const dateTime = new Date(`${dateValue}T${timeValue}`);
-
-      push(eventsRef, { title, date: dateTime.toISOString() }).then(() => {
-        document.getElementById('eventTitle').value = '';
-        document.getElementById('eventTime').value = '12:00';
-        showToast('Event added!');
-        triggerKoboRefresh();
-      }).catch(err => showToast('Error: ' + err.message, true));
-    };
-
-    window.addTask = function(e) {
-      e.preventDefault();
-
-      const text = document.getElementById('taskText').value.trim();
-      if (!text) {
-        showToast('Please enter a task description', true);
-        return;
-      }
-
-      push(todosRef, { text, done: false }).then(() => {
-        document.getElementById('taskText').value = '';
-        showToast('Task added!');
-        triggerKoboRefresh();
-      }).catch(err => showToast('Error: ' + err.message, true));
-    };
-
-    // No confirmation prompts (fast phone UX)
-    window.deleteEvent = function(id) {
-      remove(ref(database, 'events/' + id)).then(() => {
-        showToast('Event deleted');
-        triggerKoboRefresh();
-      }).catch(err => showToast('Error: ' + err.message, true));
-    };
-
-    window.deleteTask = function(id) {
-      remove(ref(database, 'todos/' + id)).then(() => {
-        showToast('Task deleted');
-        triggerKoboRefresh();
-      }).catch(err => showToast('Error: ' + err.message, true));
-    };
-
-    window.toggleTask = function(id) {
-      const task = tasks.find(t => t.id === id);
-      if (!task) return;
-      update(ref(database, 'todos/' + id), { done: !task.done }).then(() => {
-        triggerKoboRefresh();
-      }).catch(err => showToast('Error: ' + err.message, true));
-    };
-
-    // Default date = today
-    const today = new Date().toISOString().split('T')[0];
-    document.getElementById('eventDate').value = today;
-  </script>
+<!-- Background Decoration -->
+<div class="bg-decoration">
+<div class="bg-blob-1"></div>
+<div class="bg-blob-2"></div>
+<div class="bg-blob-3"></div>
+</div>
+
+<div class="container">
+<!-- Header -->
+<header class="header">
+<div class="badge">
+<svg class="icon-sm" viewBox="0 0 24 24">
+<path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
+</svg>
+Dashboard Manager
+</div>
+<h1>Manage Your Day</h1>
+<p>Seamlessly organize events and tasks</p>
+</header>
+
+<!-- Sync Banner -->
+<div class="sync-banner">
+<div class="sync-content">
+<div class="sync-left">
+<div class="sync-icon">
+<svg class="icon-md" viewBox="0 0 24 24" stroke="white">
+<path d="M13 10V3L4 14h7v7l9-11h-7z" />
+</svg>
+</div>
+<div class="sync-text">
+<h3>Kobo Dashboard Sync</h3>
+<p>Trigger refresh on your Kobo device</p>
+</div>
+</div>
+<button class="btn-refresh" onclick="triggerKoboRefresh()">
+<svg class="icon" id="refreshIcon" viewBox="0 0 24 24">
+<path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+</svg>
+<span id="refreshText">Refresh</span>
+</button>
+</div>
+</div>
+
+<!-- Main Card -->
+<div class="main-card">
+<!-- Tabs -->
+<div class="tabs-container">
+<div class="tabs">
+<button class="tab-btn active" onclick="switchTab('events')">
+<svg class="icon" viewBox="0 0 24 24">
+<rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+<line x1="16" y1="2" x2="16" y2="6" />
+<line x1="8" y1="2" x2="8" y2="6" />
+<line x1="3" y1="10" x2="21" y2="10" />
+</svg>
+Events
+</button>
+<button class="tab-btn" onclick="switchTab('tasks')">
+<svg class="icon" viewBox="0 0 24 24">
+<path d="M9 11l3 3L22 4" />
+<path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+</svg>
+Tasks
+</button>
+</div>
+</div>
+
+<!-- Events Tab -->
+<div id="eventsTab" class="tab-content active">
+<form id="eventForm" onsubmit="addEvent(event)">
+<div class="form-group">
+<label>Event Title</label>
+<input type="text" id="eventTitle" placeholder="Team meeting, doctor appointment..." required />
+</div>
+
+<div class="datetime-grid">
+<div class="form-group">
+<label>Date</label>
+<input type="date" id="eventDate" required />
+</div>
+<div class="form-group">
+<label>Time</label>
+<input type="time" id="eventTime" value="12:00" />
+</div>
+</div>
+
+<button type="submit" class="btn-primary">
+<svg class="icon" viewBox="0 0 24 24">
+<line x1="12" y1="5" x2="12" y2="19" />
+<line x1="5" y1="12" x2="19" y2="12" />
+</svg>
+Add Event
+</button>
+</form>
+
+<div class="section-header">
+<svg class="icon-sm" viewBox="0 0 24 24">
+<circle cx="12" cy="12" r="10" />
+<polyline points="12 6 12 12 16 14" />
+</svg>
+Upcoming Events
+</div>
+<div id="eventsList" class="items-list"></div>
+</div>
+
+<!-- Tasks Tab -->
+<div id="tasksTab" class="tab-content">
+<form id="taskForm" onsubmit="addTask(event)">
+<div class="form-group">
+<label>Task Description</label>
+<input type="text" id="taskText" placeholder="Buy groceries, finish report..." required />
+</div>
+
+<button type="submit" class="btn-primary">
+<svg class="icon" viewBox="0 0 24 24">
+<line x1="12" y1="5" x2="12" y2="19" />
+<line x1="5" y1="12" x2="19" y2="12" />
+</svg>
+Add Task
+</button>
+</form>
+
+<div class="section-header">
+<svg class="icon-sm" viewBox="0 0 24 24">
+<path d="M9 11l3 3L22 4" />
+<path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+</svg>
+Your Tasks
+</div>
+<div id="tasksList" class="items-list"></div>
+</div>
+</div>
+</div>
+
+<!-- Firebase SDK -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+import { getDatabase, ref, set, onValue, push, remove, update } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js";
+
+const firebaseConfig = {
+apiKey: "AIzaSyD5GG3rCDXRrc2B1CLtBgaIpoTf9G6IyTE",
+authDomain: "kobo-dashboard-5039f.firebaseapp.com",
+databaseURL: "https://kobo-dashboard-5039f-default-rtdb.firebaseio.com",
+projectId: "kobo-dashboard-5039f",
+storageBucket: "kobo-dashboard-5039f.firebasestorage.app",
+messagingSenderId: "657055634579",
+appId: "1:657055634579:web:607002f02e5a5e58772966"
+};
+
+const app = initializeApp(firebaseConfig);
+const database = getDatabase(app);
+
+const eventsRef = ref(database, 'events');
+const todosRef = ref(database, 'todos');
+const refreshTriggerRef = ref(database, 'refreshTrigger');
+
+let events = [];
+let tasks = [];
+
+const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+// Tab switching
+window.switchTab = function(tab) {
+document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+if (tab === 'events') {
+document.querySelector('.tab-btn:first-child').classList.add('active');
+document.getElementById('eventsTab').classList.add('active');
+} else {
+document.querySelector('.tab-btn:last-child').classList.add('active');
+document.getElementById('tasksTab').classList.add('active');
+}
+};
+
+// Trigger Kobo refresh
+window.triggerKoboRefresh = function() {
+const icon = document.getElementById('refreshIcon');
+const text = document.getElementById('refreshText');
+const btn = document.querySelector('.btn-refresh');
+
+btn.disabled = true;
+icon.classList.add('spin');
+text.textContent = 'Syncing...';
+
+set(refreshTriggerRef, {
+timestamp: Date.now(),
+trigger: Math.random()
+}).then(() => {
+showToast('Refresh signal sent to Kobo!');
+setTimeout(() => {
+btn.disabled = false;
+icon.classList.remove('spin');
+text.textContent = 'Refresh';
+}, 1000);
+}).catch((error) => {
+showToast('Error: ' + error.message, true);
+btn.disabled = false;
+icon.classList.remove('spin');
+text.textContent = 'Refresh';
+});
+};
+
+// Toast messages
+function showToast(message, isError = false) {
+const toast = document.createElement('div');
+toast.className = 'toast' + (isError ? ' error' : '');
+toast.textContent = message;
+document.body.appendChild(toast);
+
+setTimeout(() => {
+toast.remove();
+}, 3000);
+}
+
+// Listen for events
+onValue(eventsRef, (snapshot) => {
+const data = snapshot.val();
+events = data ? Object.keys(data).map(key => ({
+id: key,
+...data[key],
+date: new Date(data[key].date)
+})) : [];
+
+events.sort((a, b) => a.date - b.date);
+renderEvents();
+});
+
+// Listen for tasks
+onValue(todosRef, (snapshot) => {
+const data = snapshot.val();
+tasks = data ? Object.keys(data).map(key => ({
+id: key,
+...data[key]
+})) : [];
+
+renderTasks();
+});
+
+// Render events
+function renderEvents() {
+const container = document.getElementById('eventsList');
+
+if (events.length === 0) {
+container.innerHTML = `
+<div class="empty-state">
+<div class="empty-icon events">
+<svg class="icon-lg" viewBox="0 0 24 24" stroke="#3b82f6">
+<rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+<line x1="16" y1="2" x2="16" y2="6" />
+<line x1="8" y1="2" x2="8" y2="6" />
+<line x1="3" y1="10" x2="21" y2="10" />
+</svg>
+</div>
+<h4>No events yet</h4>
+<p>Add your first event to get started</p>
+</div>
+`;
+return;
+}
+
+const now = new Date();
+
+container.innerHTML = events.map((event, index) => {
+const isPast = event.date < now;
+const dateStr = `${days[event.date.getDay()]}, ${months[event.date.getMonth()]} ${event.date.getDate()}`;
+const timeStr = event.date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+
+return `
+<div class="event-card ${isPast ? 'past' : ''}" style="animation-delay: ${index * 0.05}s">
+<div class="event-date-badge">
+<div class="day">${event.date.getDate()}</div>
+<div class="month">${months[event.date.getMonth()]}</div>
+</div>
+<div class="event-content">
+<div class="event-title">${event.title}</div>
+<div class="event-datetime">
+<svg class="icon-sm" viewBox="0 0 24 24">
+<rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+<line x1="16" y1="2" x2="16" y2="6" />
+<line x1="8" y1="2" x2="8" y2="6" />
+<line x1="3" y1="10" x2="21" y2="10" />
+</svg>
+<span class="event-datetime-text">
+<span style="display: block;">${dateStr}</span>
+<span style="display: block;">${timeStr}</span>
+</span>
+</div>
+</div>
+<button class="btn-delete" onclick="deleteEvent('${event.id}')">
+<svg class="icon" viewBox="0 0 24 24" stroke="#94a3b8">
+<polyline points="3 6 5 6 21 6" />
+<path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+</svg>
+</button>
+</div>
+`;
+}).join('');
+}
+
+// Render tasks
+function renderTasks() {
+const container = document.getElementById('tasksList');
+
+if (tasks.length === 0) {
+container.innerHTML = `
+<div class="empty-state">
+<div class="empty-icon tasks">
+<svg class="icon-lg" viewBox="0 0 24 24" stroke="#10b981">
+<path d="M9 11l3 3L22 4" />
+<path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+</svg>
+</div>
+<h4>No tasks yet</h4>
+<p>Create a task to track your to-dos</p>
+</div>
+`;
+return;
+}
+
+container.innerHTML = tasks.map((task, index) => `
+<div class="task-card ${task.done ? 'done' : ''}" style="animation-delay: ${index * 0.05}s">
+<div class="task-checkbox" onclick="toggleTask('${task.id}')">
+<svg class="icon checkmark" viewBox="0 0 24 24" stroke="white">
+<polyline points="20 6 9 17 4 12" />
+</svg>
+<div class="dot"></div>
+</div>
+<div class="task-text">${task.text}</div>
+<div class="task-actions">
+${task.done ? `
+<button class="btn-undo" onclick="toggleTask('${task.id}')">
+<svg class="icon" viewBox="0 0 24 24">
+<path d="M1 4v6h6M23 20v-6h-6" />
+<path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15" />
+</svg>
+</button>
+` : ''}
+<button class="btn-delete" onclick="deleteTask('${task.id}')">
+<svg class="icon" viewBox="0 0 24 24" stroke="#94a3b8">
+<polyline points="3 6 5 6 21 6" />
+<path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+</svg>
+</button>
+</div>
+</div>
+`).join('');
+}
+
+// Add event
+window.addEvent = function(e) {
+e.preventDefault();
+
+const title = document.getElementById('eventTitle').value.trim();
+const dateValue = document.getElementById('eventDate').value;
+const timeValue = document.getElementById('eventTime').value || '12:00';
+
+if (!title || !dateValue) {
+showToast('Please fill in all required fields', true);
+return;
+}
+
+const dateTime = new Date(`${dateValue}T${timeValue}`);
+
+push(eventsRef, {
+title: title,
+date: dateTime.toISOString()
+}).then(() => {
+document.getElementById('eventTitle').value = '';
+document.getElementById('eventDate').value = new Date().toISOString().split('T')[0];
+document.getElementById('eventTime').value = '12:00';
+showToast('Event added successfully!');
+triggerKoboRefresh();
+});
+};
+
+// Add task
+window.addTask = function(e) {
+e.preventDefault();
+
+const text = document.getElementById('taskText').value.trim();
+
+if (!text) {
+showToast('Please enter a task description', true);
+return;
+}
+
+push(todosRef, {
+text: text,
+done: false
+}).then(() => {
+document.getElementById('taskText').value = '';
+showToast('Task added successfully!');
+triggerKoboRefresh();
+});
+};
+
+// Delete event
+window.deleteEvent = function(id) {
+if (confirm('Delete this event?')) {
+remove(ref(database, 'events/' + id)).then(() => {
+showToast('Event deleted');
+triggerKoboRefresh();
+});
+}
+};
+
+// Delete task
+window.deleteTask = function(id) {
+if (confirm('Delete this task?')) {
+remove(ref(database, 'todos/' + id)).then(() => {
+showToast('Task deleted');
+triggerKoboRefresh();
+});
+}
+};
+
+// Toggle task
+window.toggleTask = function(id) {
+const task = tasks.find(t => t.id === id);
+if (task) {
+update(ref(database, 'todos/' + id), {
+done: !task.done
+}).then(() => {
+triggerKoboRefresh();
+});
+}
+};
+
+// Set default date
+document.getElementById('eventDate').value = new Date().toISOString().split('T')[0];
+</script>
 </body>
 </html>
