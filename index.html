@@ -454,13 +454,21 @@
 
     .event-datetime {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       gap: 6px;
       font-size: 12px;
       color: #64748b;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+    }
+
+    .event-datetime svg {
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .event-datetime-text {
+      flex: 1;
+      min-width: 0;
+      line-height: 1.4;
     }
 
     .btn-delete {
@@ -822,6 +830,11 @@
 
       .event-datetime {
         font-size: 13px;
+        align-items: center;
+      }
+
+      .event-datetime svg {
+        margin-top: 0;
       }
 
       .task-checkbox {
@@ -1141,7 +1154,10 @@
                   <line x1="8" y1="2" x2="8" y2="6" />
                   <line x1="3" y1="10" x2="21" y2="10" />
                 </svg>
-                ${dateStr} at ${timeStr}
+                <span class="event-datetime-text">
+                  <span style="display: block;">${dateStr}</span>
+                  <span style="display: block;">${timeStr}</span>
+                </span>
               </div>
             </div>
             <button class="btn-delete" onclick="deleteEvent('${event.id}')">
