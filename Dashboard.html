@@ -365,6 +365,49 @@ white-space:nowrap;
 margin-left:6px;
 font-size:11px;
 }
+
+/* =========================================================
+   NEW: Layout modes (do nothing unless body has a mode class)
+   ========================================================= */
+
+/* 1) Big Clock + Weather only */
+body.mode-bigClockWeather .forecast-bar{ display:none; }
+body.mode-bigClockWeather .content{ display:none; }
+
+/* Make the top row fill the screen and feel like one merged panel */
+body.mode-bigClockWeather .toprow{
+height: calc(100% - (var(--pad) * 2));
+margin-bottom: 0;
+}
+body.mode-bigClockWeather .toprow table{ height: 100%; }
+body.mode-bigClockWeather .toprow td{ vertical-align: middle; }
+
+/* Bigger clock, keep the existing look */
+body.mode-bigClockWeather .big-clock{ font-size: 140px; }
+body.mode-bigClockWeather .ampm{ font-size: 28px; }
+body.mode-bigClockWeather .date{ font-size: 18px; }
+body.mode-bigClockWeather .wval{ font-size: 52px; }
+body.mode-bigClockWeather .wdetail{ font-size: 13px; }
+body.mode-bigClockWeather .weather-head{ font-size: 12px; }
+
+/* 2) Agenda focus (small clock, give space to calendar + tasks) */
+body.mode-agendaFocus .forecast-bar{ display:none; }
+
+/* Tighten the header */
+body.mode-agendaFocus .toprow{
+padding: 8px;
+margin-bottom: 8px;
+}
+body.mode-agendaFocus .title{ font-size: 10px; margin-bottom: 2px; }
+body.mode-agendaFocus .date{ font-size: 12px; margin-bottom: 2px; }
+body.mode-agendaFocus .big-clock{ font-size: 30px; margin-top: 0; }
+body.mode-agendaFocus .ampm{ font-size: 14px; }
+
+/* Give the bottom section a predictable height when forecast is hidden */
+body.mode-agendaFocus .content{
+height: calc(100% - 112px);
+}
+body.mode-agendaFocus .cols{ height: 100%; }
 </style>
 </head>
 
@@ -444,6 +487,10 @@ var WEATHER_EVERY_MS = 15 * 60 * 1000;
 var FORECAST_EVERY_MS = 6 * 60 * 60 * 1000;
 var FIREBASE_URL = 'https://kobo-dashboard-5039f-default-rtdb.firebaseio.com';
 
+/* NEW: layout mode polling (minimal) */
+var LAYOUTMODE_EVERY_MS = 15 * 1000;
+var currentLayoutMode = null;
+
 var calendarEvents = [];
 var todos = [];
 var previousEventsData = null;
@@ -461,6 +508,41 @@ return h12 + ":" + mm;
 function einkNudge(){
 try{ document.body.offsetHeight; }catch(e){}
 setTimeout(function(){ try{ document.body.offsetHeight; }catch(e){} }, 50);
+}
+
+/* NEW: apply mode (no changes when "original") */
+function applyLayoutMode(mode){
+mode = (mode || "original");
+
+if (mode === currentLayoutMode) return;
+currentLayoutMode = mode;
+
+document.body.classList.remove("mode-bigClockWeather");
+document.body.classList.remove("mode-agendaFocus");
+
+if (mode === "bigClockWeather") document.body.classList.add("mode-bigClockWeather");
+else if (mode === "agendaFocus") document.body.classList.add("mode-agendaFocus");
+
+/* force repaint when layout switches (helps e-ink) */
+forceEinkRefresh();
+einkNudge();
+}
+
+/* NEW: read config/layoutMode via REST (.json GET) */
+function fetchLayoutMode(){
+var xhr = new XMLHttpRequest();
+xhr.open('GET', FIREBASE_URL + '/config/layoutMode.json?timestamp=' + (new Date().getTime()), true);
+xhr.timeout = 8000;
+xhr.onreadystatechange = function(){
+if (xhr.readyState !== 4) return;
+if (xhr.status === 200){
+try{
+var mode = JSON.parse(xhr.responseText);
+applyLayoutMode(mode || "original");
+}catch(e){}
+}
+};
+try{ xhr.send(); }catch(e){}
 }
 
 function updateClocks(){
@@ -925,14 +1007,22 @@ update7DayForecast();
 fetchEvents();
 fetchTodos();
 
+/* NEW: initial mode read */
+fetchLayoutMode();
+
 setInterval(updateClocks, CLOCK_EVERY_MS);
 setInterval(updateWeather, WEATHER_EVERY_MS);
 setInterval(update7DayForecast, FORECAST_EVERY_MS);
 
+/* keep your existing 30s loop, just add layoutMode read */
 setInterval(function(){
 fetchEvents();
 fetchTodos();
+fetchLayoutMode();
 }, 30 * 1000);
+
+/* optional extra mode polling (small + safe) */
+setInterval(fetchLayoutMode, LAYOUTMODE_EVERY_MS);
 }
 
 startTimers();
