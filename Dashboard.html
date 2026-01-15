@@ -310,7 +310,6 @@ font-size:10px;
 color:#666;
 vertical-align:middle;
 }
-/* single-line */
 .upcoming-title{
 display:block;
 font-size:11px;
@@ -354,7 +353,6 @@ margin-right:2px;
 cursor:pointer;
 pointer-events:auto;
 }
-/* single-line */
 .todo-text{
 display:inline-block;
 width:80%;
@@ -367,84 +365,240 @@ font-size:11px;
 }
 
 /* =========================================================
-   Layout modes (only active when body has a mode class)
+   MODE 1: Big Clock + Weather (Elegant Centered Layout)
    ========================================================= */
 
-/* 1) Big Clock + Weather only (VERTICAL, clock on top) */
 body.mode-bigClockWeather .forecast-bar{ display:none !important; }
 body.mode-bigClockWeather .content{ display:none !important; }
 
-body.mode-bigClockWeather .toprow{
-height: calc(100% - (var(--pad) * 2)) !important;
-margin-bottom: 0 !important;
+body.mode-bigClockWeather .wrap{
+display:flex;
+align-items:center;
+justify-content:center;
+padding:40px;
 }
 
-/* Force the table to stop behaving like a table */
-body.mode-bigClockWeather .toprow table{
-display:block !important;
-width:100% !important;
-height:100% !important;
-table-layout:auto !important;
+body.mode-bigClockWeather .toprow{
+width:100%;
+max-width:900px;
+height:auto !important;
+margin:0 !important;
+border:none !important;
+padding:60px 40px !important;
+text-align:center;
 }
-body.mode-bigClockWeather .toprow tr{
-display:block !important;
-width:100% !important;
-}
+
+body.mode-bigClockWeather .toprow table,
+body.mode-bigClockWeather .toprow tr,
 body.mode-bigClockWeather .toprow td{
 display:block !important;
 width:100% !important;
-float:none !important;
+padding:0 !important;
+border:none !important;
 }
 
-/* Ensure clock block is on top */
 body.mode-bigClockWeather .top-left{
-width:100% !important;
-padding-right:0 !important;
+margin-bottom:50px;
+padding-bottom:50px;
+border-bottom:3px solid #000 !important;
 }
 
-/* Weather block underneath */
 body.mode-bigClockWeather .top-right{
-width:100% !important;
-border-left:0 !important;
-padding-left:0 !important;
-
-border-top:2px solid #000 !important;
-padding-top:12px !important;
-margin-top:10px !important;
+padding-top:0 !important;
+margin-top:0 !important;
 }
 
-/* Clock sizing */
-body.mode-bigClockWeather .big-clock{ font-size: 130px !important; }
-body.mode-bigClockWeather .ampm{ font-size: 28px !important; }
-body.mode-bigClockWeather .date{ font-size: 18px !important; }
+body.mode-bigClockWeather .title{
+font-size:13px;
+letter-spacing:3px;
+margin-bottom:12px;
+opacity:0.7;
+}
 
-/* Weather sizing */
-body.mode-bigClockWeather .wval{ font-size: 48px !important; }
-body.mode-bigClockWeather .wdetail{ font-size: 13px !important; }
-body.mode-bigClockWeather .weather-head{ font-size: 12px !important; }
+body.mode-bigClockWeather .date{
+font-size:22px;
+margin-bottom:20px;
+font-weight:600;
+}
 
-/* 2) Agenda focus (clock only at top; no weather module) */
-body.mode-agendaFocus .forecast-bar{ display:none; }
+body.mode-bigClockWeather .big-clock{
+font-size:180px !important;
+font-weight:900;
+letter-spacing:-6px;
+margin:20px 0;
+line-height:0.9;
+}
 
-/* Hide the entire weather cell */
-body.mode-agendaFocus .top-right{ display:none; }
-body.mode-agendaFocus .top-left{ width:100%; padding-right:0; }
+body.mode-bigClockWeather .ampm{
+font-size:36px !important;
+font-weight:600;
+letter-spacing:2px;
+opacity:0.8;
+}
 
-/* Tighten the header */
+body.mode-bigClockWeather .weather-head{
+font-size:14px;
+letter-spacing:2px;
+margin-bottom:30px;
+text-align:center;
+}
+
+body.mode-bigClockWeather .weather-row{
+max-width:600px;
+margin:0 auto;
+}
+
+body.mode-bigClockWeather .wbox{
+width:48%;
+padding:20px 10px;
+}
+
+body.mode-bigClockWeather .wlabel{
+font-size:12px;
+letter-spacing:1.5px;
+margin-bottom:12px;
+}
+
+body.mode-bigClockWeather .wval{
+font-size:64px !important;
+font-weight:900;
+}
+
+body.mode-bigClockWeather .wdetail{
+font-size:16px;
+margin-top:8px;
+font-style:normal;
+font-weight:500;
+}
+
+body.mode-bigClockWeather .status{
+text-align:center;
+margin-top:30px;
+font-size:11px;
+opacity:0.6;
+}
+
+/* =========================================================
+   MODE 2: Agenda Focus (Clean Compact Layout)
+   ========================================================= */
+
+body.mode-agendaFocus .forecast-bar{ display:none !important; }
+body.mode-agendaFocus .top-right{ display:none !important; }
+
 body.mode-agendaFocus .toprow{
-padding: 8px;
-margin-bottom: 8px;
+border:none !important;
+border-bottom:3px solid #000 !important;
+border-radius:0 !important;
+padding:16px 20px !important;
+margin-bottom:0 !important;
+background:#f9f9f9;
 }
-body.mode-agendaFocus .title{ font-size: 10px; margin-bottom: 2px; }
-body.mode-agendaFocus .date{ font-size: 12px; margin-bottom: 2px; }
-body.mode-agendaFocus .big-clock{ font-size: 30px; margin-top: 0; }
-body.mode-agendaFocus .ampm{ font-size: 14px; }
 
-/* Bottom section height */
-body.mode-agendaFocus .content{
-height: calc(100% - 112px);
+body.mode-agendaFocus .top-left{
+width:100%;
+padding:0;
+text-align:center;
 }
-body.mode-agendaFocus .cols{ height: 100%; }
+
+body.mode-agendaFocus .title{
+font-size:11px;
+letter-spacing:2px;
+margin-bottom:6px;
+opacity:0.7;
+}
+
+body.mode-agendaFocus .date{
+font-size:15px;
+margin-bottom:8px;
+font-weight:600;
+}
+
+body.mode-agendaFocus .big-clock{
+font-size:42px !important;
+font-weight:900;
+margin:0;
+letter-spacing:-2px;
+}
+
+body.mode-agendaFocus .ampm{
+font-size:16px !important;
+font-weight:600;
+}
+
+body.mode-agendaFocus .content{
+height:calc(100% - 120px);
+padding-top:10px;
+}
+
+body.mode-agendaFocus .cols{
+height:100%;
+}
+
+body.mode-agendaFocus .card{
+border-radius:0 !important;
+}
+
+body.mode-agendaFocus .col:first-child .card{
+border-right:2px solid #000 !important;
+border-radius:0 !important;
+}
+
+body.mode-agendaFocus .col:last-child .card{
+border-left:1px solid #000 !important;
+border-radius:0 !important;
+}
+
+body.mode-agendaFocus .card h2{
+font-size:13px;
+letter-spacing:2px;
+padding-bottom:10px;
+margin-bottom:12px;
+}
+
+body.mode-agendaFocus .cal-head{
+font-size:16px;
+margin-bottom:12px;
+}
+
+body.mode-agendaFocus .cal-cell{
+padding:8px 0;
+font-size:13px;
+font-weight:600;
+}
+
+body.mode-agendaFocus .cal-dow{
+font-size:11px;
+}
+
+body.mode-agendaFocus .upcoming-section{
+background:#fff;
+border:2px solid #000;
+border-radius:0;
+padding:12px;
+margin-bottom:14px;
+}
+
+body.mode-agendaFocus .upcoming-header{
+font-size:11px;
+letter-spacing:1.5px;
+margin-bottom:10px;
+}
+
+body.mode-agendaFocus .upcoming-item{
+border:1px solid #000;
+border-radius:0;
+padding:8px 10px;
+margin-bottom:10px;
+}
+
+body.mode-agendaFocus .todo-item{
+border:1px solid #000;
+border-radius:0;
+padding:10px 12px;
+margin-bottom:10px;
+font-size:13px;
+background:#fff;
+}
 </style>
 </head>
 
@@ -545,13 +699,11 @@ try{ document.body.offsetHeight; }catch(e){}
 setTimeout(function(){ try{ document.body.offsetHeight; }catch(e){} }, 50);
 }
 
-/* Layout mode: read config/layoutMode.json */
 function applyLayoutMode(mode){
 mode = (mode || "original");
 if (mode === currentLayoutMode) return;
 currentLayoutMode = mode;
 
-/* Kobo-friendly: set body class via className */
 if (mode === "bigClockWeather") document.body.className = "mode-bigClockWeather";
 else if (mode === "agendaFocus") document.body.className = "mode-agendaFocus";
 else document.body.className = "";
@@ -568,7 +720,7 @@ xhr.onreadystatechange = function(){
 if (xhr.readyState !== 4) return;
 if (xhr.status === 200){
 try{
-var mode = JSON.parse(xhr.responseText); /* e.g. "bigClockWeather" */
+var mode = JSON.parse(xhr.responseText);
 applyLayoutMode(mode || "original");
 }catch(e){}
 }
